@@ -99,7 +99,7 @@ export default function Home() {
                 Developer Area
               </Link>
               <button 
-                onClick={() => import("@/lib/firebase").then(m => m.auth.signOut())} 
+                onClick={() => import("@/lib/firebase").then(m => m.auth?.signOut())} 
                 className="w-full text-left px-4 py-2 mt-1 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors"
               >
                 Sign out

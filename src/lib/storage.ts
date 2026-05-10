@@ -55,6 +55,10 @@ export const convertToWebP = (file: File): Promise<Blob> => {
  * Uploads an image to Firebase Storage after converting to WebP.
  */
 export const uploadJobImage = async (jobId: string, file: File): Promise<string> => {
+  if (!storage) {
+    throw new Error("Firebase Storage is not initialized. Check your Firebase configuration.");
+  }
+  
   const webpBlob = await convertToWebP(file);
   const fileName = `img_${Date.now()}.webp`;
   const storageRef = ref(storage, `jobs/${jobId}/${fileName}`);

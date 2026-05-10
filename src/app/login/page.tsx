@@ -21,6 +21,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      if (!auth) {
+        throw new Error("Firebase Auth is not initialized. Please check your environment variables.");
+      }
+
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
