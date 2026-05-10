@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getActiveJobs, getJobs } from "@/lib/firestore";
 import { Job, PaintSpec } from "@/lib/models";
-import NewJobModal from "@/components/NewJobModal";
+import JobModal from "@/components/JobModal";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -16,6 +16,7 @@ export default function Home() {
   const [activeJobs, setActiveJobs] = useState<Job[]>([]);
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job | undefined>(undefined);
 
   const fetchData = async () => {
     try {
@@ -42,6 +43,16 @@ export default function Home() {
       </div>
     );
   }
+
+  const openNewJobModal = () => {
+    setSelectedJob(undefined);
+    setIsModalOpen(true);
+  };
+
+  const openEditJobModal = (job: Job) => {
+    setSelectedJob(job);
+    setIsModalOpen(true);
+  };
 
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
@@ -115,7 +126,10 @@ export default function Home() {
         </div>
 
         {/* Hero Tile (Active Job) - 2x2 */}
-        <div className="glass-panel col-span-1 md:col-span-2 lg:col-span-2 row-span-2 rounded-3xl p-6 md:p-8 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300 group cursor-pointer relative overflow-hidden">
+        <div 
+          onClick={() => activeJobs.length > 0 && openEditJobModal(activeJobs[0])}
+          className="glass-panel col-span-1 md:col-span-2 lg:col-span-2 row-span-2 rounded-3xl p-6 md:p-8 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300 group cursor-pointer relative overflow-hidden"
+        >
           <div className="absolute top-0 right-0 w-48 h-48 bg-brand/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-brand/20"></div>
           {activeJobs.length > 0 ? (
             <>
@@ -160,7 +174,7 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center h-full text-center py-10">
               <p className="text-text-muted mb-4 italic">No active jobs currently</p>
               <button 
-                onClick={() => setIsModalOpen(true)}
+                onClick={(e) => { e.stopPropagation(); openNewJobModal(); }}
                 className="px-6 py-2 bg-brand/10 text-brand rounded-full text-sm font-bold hover:bg-brand hover:text-bg-base transition-all"
               >
                 CREATE YOUR FIRST JOB
@@ -171,7 +185,7 @@ export default function Home() {
 
         {/* Quick Add - 1x1 */}
         <div 
-          onClick={() => setIsModalOpen(true)}
+          onClick={openNewJobModal}
           className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.02] duration-300 cursor-pointer group hover:border-brand/50"
         >
           <div className="w-16 h-16 bg-brand/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-brand group-hover:shadow-lg group-hover:shadow-brand/20 transition-all duration-300 transform group-hover:-translate-y-1">
@@ -229,10 +243,11 @@ export default function Home() {
           </div>
         </div>
 
-        <NewJobModal 
+        <JobModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSuccess={fetchData}
+          initialJob={selectedJob}
         />
 
       </main>

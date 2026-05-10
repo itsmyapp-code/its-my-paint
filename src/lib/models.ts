@@ -17,7 +17,8 @@ export interface Job {
   dueDate?: Date | string;
   status: 'active' | 'completed' | 'pending';
   paintSpecs: PaintSpec[];
-  completedImageUrl?: string; // Firebase Storage URL
+  imageUrls?: string[];
+  completedImageUrl?: string; // Legacy field for the main proof image
   createdAt: Date | string;
   updatedAt: Date | string;
 }

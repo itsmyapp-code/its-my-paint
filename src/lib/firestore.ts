@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, updateDoc, doc, getDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc, getDoc, query, where, orderBy, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { Job } from './models';
 
@@ -30,4 +30,8 @@ export const getActiveJobs = async () => {
 export const updateJob = async (id: string, updates: Partial<Job>) => {
   const docRef = doc(db, JOBS_COLLECTION, id);
   await updateDoc(docRef, { ...updates, updatedAt: new Date().toISOString() });
+};
+export const deleteJob = async (id: string) => {
+  const docRef = doc(db, JOBS_COLLECTION, id);
+  await deleteDoc(docRef);
 };
