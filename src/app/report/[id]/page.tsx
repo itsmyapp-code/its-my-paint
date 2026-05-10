@@ -112,7 +112,7 @@ export default function ReportPage() {
       </div>
 
       {/* Report Content */}
-      <div className="max-w-[210mm] mx-auto bg-white shadow-2xl my-8 print:my-0 print:shadow-none min-h-[297mm] p-[20mm]">
+      <div className="w-full md:max-w-[210mm] mx-auto bg-white shadow-2xl my-8 print:my-0 print:shadow-none min-h-screen md:min-h-[297mm] p-4 md:p-[20mm]">
         {/* Report Header */}
         <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8">
           <div>
@@ -179,8 +179,8 @@ export default function ReportPage() {
             <span className="w-1.5 h-6 bg-brand rounded-full"></span>
             Technical Specifications
           </h3>
-          <div className="overflow-hidden rounded-2xl border border-gray-200">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto -mx-4 md:mx-0 rounded-2xl border border-gray-200">
+            <table className="w-full text-left border-collapse min-w-[600px] md:min-w-0">
               <thead>
                 <tr className="bg-gray-900 text-white text-[10px] font-bold uppercase tracking-widest">
                   <th className="px-6 py-4">Area / Surface</th>
