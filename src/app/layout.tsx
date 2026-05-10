@@ -20,6 +20,15 @@ export const metadata: Metadata = {
   title: "itsmypaint | Professional Paint Job Manager",
   description: "High-performance PWA for painters and contractors.",
   manifest: "/manifest.json",
+  themeColor: "#1DA1F2",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ItsMyPaint",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
