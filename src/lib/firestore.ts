@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy, deleteDoc, setDoc, getDoc, or } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy, deleteDoc, setDoc, getDoc } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import { Job, DecoratorSettings } from './models';
 
@@ -37,11 +37,13 @@ export const getJobs = async () => {
   
   const q = query(
     collection(database, JOBS_COLLECTION), 
-    or(where('userId', '==', user.uid), where('userId', '==', null)),
     orderBy('createdAt', 'desc')
   );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+  const allJobs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+  
+  // Filter in memory for compatibility and to avoid complex index/TS issues
+  return allJobs.filter(job => job.userId === user.uid || !job.userId);
 };
 
 export const getActiveJobs = async () => {
@@ -51,12 +53,13 @@ export const getActiveJobs = async () => {
 
   const q = query(
     collection(database, JOBS_COLLECTION), 
-    or(where('userId', '==', user.uid), where('userId', '==', null)),
     where('status', '==', 'active'), 
     orderBy('dueDate', 'asc')
   );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+  const allActive = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+  
+  return allActive.filter(job => job.userId === user.uid || !job.userId);
 };
 
 export const getDecoratorSettings = async (userId: string): Promise<DecoratorSettings | null> => {
