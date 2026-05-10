@@ -25,7 +25,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
     clientEmail: "",
     clientPhone: "",
     dueDate: "",
-    status: "active" as const,
+    status: "active" as Job["status"],
   });
 
   const [paintSpecs, setPaintSpecs] = useState<PaintSpec[]>([
