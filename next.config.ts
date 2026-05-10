@@ -15,11 +15,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Silence Turbopack vs Webpack warning in Next.js 16/Vercel
-  // next-pwa currently requires Webpack to inject service worker logic
-  experimental: {
-    turbopack: {},
-  },
 };
 
 export default withPWA(nextConfig);
