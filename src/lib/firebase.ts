@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-import { getAuth } from "firebase/auth";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
+import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,19 +13,24 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app;
-let db: any;
-let storage: any;
-let auth: any;
+let app: FirebaseApp | undefined;
+let db: Firestore | undefined;
+let storage: FirebaseStorage | undefined;
+let auth: Auth | undefined;
 
-if (typeof window !== "undefined" || process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-  try {
-    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    db = getFirestore(app);
-    storage = getStorage(app);
-    auth = getAuth(app);
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
+// Only initialize on the client side if the API key is present
+if (typeof window !== "undefined") {
+  if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+    try {
+      app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+      db = getFirestore(app);
+      storage = getStorage(app);
+      auth = getAuth(app);
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+    }
+  } else {
+    console.error("Firebase Configuration Error: NEXT_PUBLIC_FIREBASE_API_KEY is missing. Please add it to your environment variables.");
   }
 }
 
