@@ -65,6 +65,33 @@ export default function ReportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 print:bg-white pb-20">
+      <style jsx global>{`
+        @media print {
+          /* Hide browser headers/footers by setting margin to 0 */
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          
+          /* Add padding back to the body so content doesn't hit the edge */
+          body {
+            padding: 15mm;
+            background: white !important;
+          }
+
+          /* Hide app footer and control bars */
+          nav, footer, .print-hidden, .sticky {
+            display: none !important;
+          }
+
+          .glass-panel {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+          }
+        }
+      `}</style>
+
       {/* Control Bar */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center print:hidden shadow-sm">
         <button onClick={() => router.push("/")} className="flex items-center gap-2 text-gray-600 font-medium hover:text-black">

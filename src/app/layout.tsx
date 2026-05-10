@@ -38,7 +38,7 @@ export default function RootLayout({
             {children}
           </div>
 
-          <footer className="w-full border-t border-border-subtle py-8 mt-auto bg-bg-panel">
+          <footer className="w-full border-t border-border-subtle py-8 mt-auto bg-bg-panel print:hidden">
             <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row justify-between items-center gap-6">
               <div className="flex items-center flex-wrap justify-center gap-2 text-text-muted text-sm text-center">
                 <span>&copy; {new Date().getFullYear()} ItsMyPaint | All rights reserved | Developed by</span>
@@ -55,7 +55,9 @@ export default function RootLayout({
             </div>
           </footer>
           
-          <CookieBanner />
+          <div className="print:hidden">
+            <CookieBanner />
+          </div>
         </AuthProvider>
       </body>
     </html>
