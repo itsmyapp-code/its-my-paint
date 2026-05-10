@@ -34,11 +34,11 @@ export default function Home() {
     job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.paintSpecs.some(spec => 
-      spec.colourName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      spec.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      spec.what.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (spec.colourName && spec.colourName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (spec.area && spec.area.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (spec.what && spec.what.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (spec.notes && spec.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      spec.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())
+      (spec.manufacturer && spec.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   );
 
