@@ -105,7 +105,7 @@ export default function Home() {
           <div className="relative w-full max-w-3xl mx-auto flex items-center">
             <input
               type="text"
-              placeholder="Search jobs, colors, or clients..."
+              placeholder="Search jobs, colours, or clients..."
               className="w-full bg-bg-panel-hover border border-border-subtle rounded-2xl py-4 px-14 text-lg text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all shadow-inner"
             />
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 absolute left-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,7 +123,7 @@ export default function Home() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="px-4 py-1.5 bg-brand/20 text-brand text-xs font-bold rounded-full uppercase tracking-widest shadow-sm">Active Job</span>
                   <span className="text-text-muted text-sm font-medium bg-bg-panel px-3 py-1 rounded-full border border-border-subtle">
-                    Due: {new Date(activeJobs[0].dueDate || activeJobs[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    Due: {new Date(activeJobs[0].dueDate || activeJobs[0].createdAt).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">{activeJobs[0].name}</h2>
@@ -137,16 +137,16 @@ export default function Home() {
                       className="w-10 h-10 rounded-full border-2 border-bg-base shadow-md relative flex items-center justify-center text-[10px] font-bold text-white/40 uppercase overflow-hidden"
                       style={{ 
                         zIndex: 30 - i,
-                        backgroundColor: spec.colorCode || 'var(--bg-panel-hover)'
+                        backgroundColor: spec.colourCode || 'var(--bg-panel-hover)'
                       }}
-                      title={spec.colorName}
+                      title={spec.colourName}
                     >
-                      {!spec.colorCode && spec.manufacturer.charAt(0)}
+                      {!spec.colourCode && spec.manufacturer.charAt(0)}
                     </div>
                   ))}
                 </div>
                 {activeJobs[0].paintSpecs.length > 3 && (
-                  <span className="text-sm text-text-muted font-medium ml-2">+{activeJobs[0].paintSpecs.length - 3} more colors</span>
+                  <span className="text-sm text-text-muted font-medium ml-2">+{activeJobs[0].paintSpecs.length - 3} more colours</span>
                 )}
                 <div className="flex-1"></div>
                 <div className="w-10 h-10 rounded-full bg-bg-panel flex items-center justify-center group-hover:bg-brand group-hover:text-bg-base transition-colors border border-border-subtle">
@@ -202,10 +202,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Recent Colors */}
+        {/* Recent Colours */}
         <div className="glass-panel col-span-1 md:col-span-2 lg:col-span-2 row-span-1 rounded-3xl p-6 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Recent Colors</h3>
+            <h3 className="font-bold text-lg">Recent Colours</h3>
             <button className="text-sm font-medium text-text-muted hover:text-brand transition-colors flex items-center gap-1">
               View All <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
             </button>
@@ -215,17 +215,17 @@ export default function Home() {
               <div key={i} className="min-w-[100px] flex flex-col gap-3 group cursor-pointer">
                 <div 
                   className="w-full h-14 rounded-2xl border border-border-subtle shadow-sm group-hover:scale-105 transition-transform duration-300 flex items-center justify-center text-xs font-bold text-white/20"
-                  style={{ backgroundColor: spec.colorCode || 'var(--bg-panel-hover)' }}
+                  style={{ backgroundColor: spec.colourCode || 'var(--bg-panel-hover)' }}
                 >
-                  {!spec.colorCode && spec.manufacturer.charAt(0)}
+                  {!spec.colourCode && spec.manufacturer.charAt(0)}
                 </div>
                 <div>
-                  <p className="font-semibold text-sm truncate text-text-main group-hover:text-brand transition-colors">{spec.colorName}</p>
+                  <p className="font-semibold text-sm truncate text-text-main group-hover:text-brand transition-colors">{spec.colourName}</p>
                   <p className="text-text-muted text-[10px] font-bold uppercase tracking-tight mt-0.5">{spec.manufacturer}</p>
                 </div>
               </div>
             ))}
-            {allJobs.length === 0 && <p className="text-text-muted text-sm italic">No colors recorded yet</p>}
+            {allJobs.length === 0 && <p className="text-text-muted text-sm italic">No colours recorded yet</p>}
           </div>
         </div>
 

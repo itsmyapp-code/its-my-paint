@@ -22,13 +22,13 @@ export default function NewJobModal({ isOpen, onClose, onSuccess }: NewJobModalP
   });
 
   const [paintSpecs, setPaintSpecs] = useState<PaintSpec[]>([
-    { manufacturer: "", colorName: "", finish: "Matte" }
+    { manufacturer: "", colourName: "", finish: "Matt" }
   ]);
 
   if (!isOpen) return null;
 
   const handleAddPaintSpec = () => {
-    setPaintSpecs([...paintSpecs, { manufacturer: "", colorName: "", finish: "Matte" }]);
+    setPaintSpecs([...paintSpecs, { manufacturer: "", colourName: "", finish: "Matt" }]);
   };
 
   const handleRemovePaintSpec = (index: number) => {
@@ -48,7 +48,7 @@ export default function NewJobModal({ isOpen, onClose, onSuccess }: NewJobModalP
       await createJob({
         ...formData,
         startDate: new Date().toISOString(),
-        paintSpecs: paintSpecs.filter(spec => spec.manufacturer && spec.colorName),
+        paintSpecs: paintSpecs.filter(spec => spec.manufacturer && spec.colourName),
       });
       onSuccess();
       onClose();
@@ -135,7 +135,7 @@ export default function NewJobModal({ isOpen, onClose, onSuccess }: NewJobModalP
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
-                ADD COLOR
+                ADD COLOUR
               </button>
             </div>
 
@@ -157,18 +157,18 @@ export default function NewJobModal({ isOpen, onClose, onSuccess }: NewJobModalP
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Manufacturer</label>
                       <input
-                        placeholder="e.g. Benjamin Moore"
+                        placeholder="e.g. Dulux / Crown"
                         value={spec.manufacturer}
                         onChange={(e) => handlePaintSpecChange(index, "manufacturer", e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Color Name</label>
+                      <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Colour Name</label>
                       <input
-                        placeholder="e.g. Navajo White"
-                        value={spec.colorName}
-                        onChange={(e) => handlePaintSpecChange(index, "colorName", e.target.value)}
+                        placeholder="e.g. Magnolia / Polished Pebble"
+                        value={spec.colourName}
+                        onChange={(e) => handlePaintSpecChange(index, "colourName", e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
                       />
                     </div>
@@ -177,14 +177,14 @@ export default function NewJobModal({ isOpen, onClose, onSuccess }: NewJobModalP
                       <div className="flex gap-2">
                         <input
                           type="color"
-                          value={spec.colorCode || "#ffffff"}
-                          onChange={(e) => handlePaintSpecChange(index, "colorCode", e.target.value)}
+                          value={spec.colourCode || "#ffffff"}
+                          onChange={(e) => handlePaintSpecChange(index, "colourCode", e.target.value)}
                           className="w-10 h-9 bg-transparent border-none cursor-pointer"
                         />
                         <input
                           placeholder="#FFFFFF"
-                          value={spec.colorCode || ""}
-                          onChange={(e) => handlePaintSpecChange(index, "colorCode", e.target.value)}
+                          value={spec.colourCode || ""}
+                          onChange={(e) => handlePaintSpecChange(index, "colourCode", e.target.value)}
                           className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
                         />
                       </div>
@@ -196,11 +196,12 @@ export default function NewJobModal({ isOpen, onClose, onSuccess }: NewJobModalP
                         onChange={(e) => handlePaintSpecChange(index, "finish", e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30 appearance-none cursor-pointer"
                       >
-                        <option value="Matte" className="bg-[#1a1a1a]">Matte</option>
+                        <option value="Matt" className="bg-[#1a1a1a]">Matt</option>
+                        <option value="Vinyl Matt" className="bg-[#1a1a1a]">Vinyl Matt</option>
                         <option value="Eggshell" className="bg-[#1a1a1a]">Eggshell</option>
                         <option value="Satin" className="bg-[#1a1a1a]">Satin</option>
-                        <option value="Semi-Gloss" className="bg-[#1a1a1a]">Semi-Gloss</option>
-                        <option value="High-Gloss" className="bg-[#1a1a1a]">High-Gloss</option>
+                        <option value="Gloss" className="bg-[#1a1a1a]">Gloss</option>
+                        <option value="Masonry" className="bg-[#1a1a1a]">Masonry</option>
                       </select>
                     </div>
                   </div>

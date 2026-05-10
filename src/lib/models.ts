@@ -2,9 +2,9 @@ export interface PaintSpec {
   id?: string;
   manufacturer: string;
   range?: string;
-  colorName: string;
-  colorCode?: string;
-  finish: string; // e.g., Matte, Eggshell, Semi-Gloss
+  colourName: string;
+  colourCode?: string;
+  finish: string; // e.g., Matt, Eggshell, Satin, Gloss, Masonry
 }
 
 export interface Job {
