@@ -144,11 +144,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero Tile (Active Jobs List) - 2x2 */}
+        {/* Hero Tile (Active Jobs List) - 3x2 on desktop */}
         <div 
-          className="glass-panel col-span-1 md:col-span-2 lg:col-span-2 row-span-2 rounded-3xl p-6 md:p-8 flex flex-col transition-transform hover:scale-[1.01] duration-300 relative overflow-hidden"
+          className="glass-panel col-span-1 md:col-span-2 lg:col-span-3 row-span-2 rounded-3xl p-6 md:p-8 flex flex-col transition-transform hover:scale-[1.01] duration-300 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-48 h-48 bg-brand/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand/10 rounded-full blur-3xl -mr-24 -mt-24"></div>
           
           <div className="flex items-center justify-between mb-6 z-10">
             <div className="flex items-center gap-2">
@@ -157,85 +157,97 @@ export default function Home() {
                 {filteredActiveJobs.length} FOUND
               </span>
             </div>
-            {filteredActiveJobs.length > 0 && (
-              <span className="text-[10px] font-black text-white/20 uppercase tracking-tighter">Click to edit</span>
-            )}
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black text-white/20 uppercase tracking-tighter hidden sm:block">Click any job to manage specs</span>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 z-10 space-y-3">
             {filteredActiveJobs.length > 0 ? (
-              filteredActiveJobs.map((job) => (
-                <div 
-                  key={job.id}
-                  onClick={() => openEditJobModal(job)}
-                  className="bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/10 hover:border-brand/30 transition-all cursor-pointer group"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg group-hover:text-brand transition-colors truncate">{job.name}</h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-text-muted text-sm font-medium">{job.clientName}</p>
-                        {job.paintSpecs.length > 0 && (
-                          <>
-                            <span className="w-1 h-1 bg-text-muted rounded-full"></span>
-                            <p className="text-text-muted text-xs bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
-                              {job.paintSpecs[0].area}
-                            </p>
-                          </>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredActiveJobs.map((job) => (
+                  <div 
+                    key={job.id}
+                    onClick={() => openEditJobModal(job)}
+                    className="bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/10 hover:border-brand/30 transition-all cursor-pointer group"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg group-hover:text-brand transition-colors truncate">{job.name}</h3>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-text-muted text-sm font-medium">{job.clientName}</p>
+                          {job.paintSpecs.length > 0 && (
+                            <>
+                              <span className="w-1 h-1 bg-text-muted rounded-full"></span>
+                              <p className="text-text-muted text-xs bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+                                {job.paintSpecs[0].area}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right ml-4 shrink-0">
+                        <p className="text-[10px] font-bold text-text-muted uppercase">Due</p>
+                        <p className="text-xs font-bold text-white">{new Date(job.dueDate || job.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
+                      </div>
+                    </div>
+                    
+                    {job.paintSpecs.length > 0 && (
+                      <div className="mb-4 bg-black/20 rounded-xl p-3 border border-white/5">
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-10 h-10 rounded-xl border border-white/10 shrink-0 shadow-inner"
+                            style={{ backgroundColor: job.paintSpecs[0].colourCode || '#333' }}
+                          />
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-brand uppercase tracking-tighter">{job.paintSpecs[0].what || 'General'}</p>
+                            <p className="text-sm font-bold text-white truncate">{job.paintSpecs[0].colourName}</p>
+                            <p className="text-[10px] text-text-muted truncate">{job.paintSpecs[0].manufacturer} {job.paintSpecs[0].range}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-2">
+                          {job.paintSpecs.slice(1, 5).map((spec, i) => (
+                            <div 
+                              key={i} 
+                              className="w-6 h-6 rounded-full border border-bg-base shadow-sm"
+                              style={{ backgroundColor: spec.colourCode || '#333', zIndex: 10-i }}
+                              title={`${spec.area}: ${spec.colourName}`}
+                            />
+                          ))}
+                        </div>
+                        {job.paintSpecs.length > 5 && (
+                          <span className="text-[10px] text-text-muted font-bold">+{job.paintSpecs.length - 5} MORE</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Link 
+                          href={`/report/${job.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1.5 bg-brand/10 text-brand rounded-lg border border-brand/20 hover:bg-brand hover:text-bg-base transition-all"
+                          title="View Report"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
+                          </svg>
+                        </Link>
+                        {job.imageUrls && job.imageUrls.length > 0 && (
+                           <div className="flex items-center gap-1 text-[10px] font-bold text-text-muted bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                               <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                             </svg>
+                             {job.imageUrls.length}
+                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="text-right ml-4 shrink-0">
-                      <p className="text-[10px] font-bold text-text-muted uppercase">Due</p>
-                      <p className="text-xs font-bold text-white">{new Date(job.dueDate || job.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
-                    </div>
                   </div>
-                  
-                  {job.paintSpecs.length > 0 && (
-                    <div className="mb-4 bg-black/20 rounded-xl p-3 border border-white/5">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-10 h-10 rounded-xl border border-white/10 shrink-0 shadow-inner"
-                          style={{ backgroundColor: job.paintSpecs[0].colourCode || '#333' }}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-bold text-brand uppercase tracking-tighter">{job.paintSpecs[0].what || 'General'}</p>
-                          <p className="text-sm font-bold text-white truncate">{job.paintSpecs[0].colourName}</p>
-                          <p className="text-[10px] text-text-muted truncate">{job.paintSpecs[0].manufacturer} {job.paintSpecs[0].range}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex -space-x-2">
-                        {job.paintSpecs.slice(1, 5).map((spec, i) => (
-                          <div 
-                            key={i} 
-                            className="w-6 h-6 rounded-full border border-bg-base shadow-sm"
-                            style={{ backgroundColor: spec.colourCode || '#333', zIndex: 10-i }}
-                            title={`${spec.area}: ${spec.colourName}`}
-                          />
-                        ))}
-                      </div>
-                      {job.paintSpecs.length > 5 && (
-                        <span className="text-[10px] text-text-muted font-bold">+{job.paintSpecs.length - 5} MORE</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {job.imageUrls && job.imageUrls.length > 0 && (
-                         <div className="flex items-center gap-1 text-[10px] font-bold text-text-muted bg-white/5 px-2 py-1 rounded-lg border border-white/5">
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                             <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                           </svg>
-                           {job.imageUrls.length}
-                         </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center py-10 opacity-50">
                 <p className="text-text-muted mb-4 italic">No matching jobs found</p>
@@ -262,52 +274,6 @@ export default function Home() {
           </div>
           <h3 className="font-bold text-lg">New Job</h3>
           <p className="text-text-muted text-sm mt-1">Record a paint spec</p>
-        </div>
-
-        {/* Job Statistics - 1x1 */}
-        <div className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300">
-          <div className="flex justify-between items-start">
-            <h3 className="text-text-muted text-sm font-medium uppercase tracking-wider">Overall</h3>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black text-text-main">{allJobs.length}</span>
-            </div>
-            <p className="text-sm text-text-muted mt-2 font-medium">Total Jobs Tracked</p>
-          </div>
-          <div className="w-full bg-bg-panel-hover h-2.5 rounded-full overflow-hidden mt-3 shadow-inner">
-            <div className="bg-brand h-full rounded-full" style={{ width: `${Math.min(100, (allJobs.filter(j => j.status === 'completed').length / (allJobs.length || 1)) * 100)}%` }}></div>
-          </div>
-        </div>
-
-        {/* Recent Colours */}
-        <div className="glass-panel col-span-1 md:col-span-2 lg:col-span-2 row-span-1 rounded-3xl p-6 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Recent Colours</h3>
-            <button className="text-sm font-medium text-text-muted hover:text-brand transition-colors flex items-center gap-1">
-              View All <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
-            </button>
-          </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-1">
-            {allJobs.flatMap(j => j.paintSpecs).slice(0, 8).map((spec, i) => (
-              <div key={i} className="min-w-[100px] flex flex-col gap-3 group cursor-pointer">
-                <div 
-                  className="w-full h-14 rounded-2xl border border-border-subtle shadow-sm group-hover:scale-105 transition-transform duration-300 flex items-center justify-center text-xs font-bold text-white/20"
-                  style={{ backgroundColor: spec.colourCode || 'var(--bg-panel-hover)' }}
-                >
-                  {!spec.colourCode && spec.manufacturer.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-sm truncate text-text-main group-hover:text-brand transition-colors">{spec.colourName}</p>
-                  <p className="text-text-muted text-[10px] font-bold uppercase tracking-tight mt-0.5">{spec.manufacturer}</p>
-                </div>
-              </div>
-            ))}
-            {allJobs.length === 0 && <p className="text-text-muted text-sm italic">No colours recorded yet</p>}
-          </div>
         </div>
 
         <JobModal 
