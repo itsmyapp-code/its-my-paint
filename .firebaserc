@@ -1,5 +1,7 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "its-my-paint"
+  },
   "targets": {},
   "etags": {}
 }

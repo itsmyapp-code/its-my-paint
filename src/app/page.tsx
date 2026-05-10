@@ -1,6 +1,32 @@
+"use client";
+
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg-base">
+        <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
+
   return (
     <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -19,10 +45,38 @@ export default function Home() {
             itsmy<span className="text-brand">paint</span>
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-bg-panel-hover flex items-center justify-center border border-border-subtle cursor-pointer hover:border-brand transition-colors">
-            <span className="text-sm font-medium">MC</span>
+        <div className="flex items-center gap-4 relative">
+          <div className="relative h-10 w-10 rounded-full bg-bg-panel-hover flex items-center justify-center border border-border-subtle cursor-pointer hover:border-brand transition-colors overflow-hidden" title={user.email || "User"}>
+            {user.photoURL ? (
+              <Image src={user.photoURL} alt="Profile" fill className="object-cover" />
+            ) : (
+              <span className="text-sm font-medium">{userInitial}</span>
+            )}
           </div>
+          
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-bg-panel-hover border border-transparent hover:border-border-subtle transition-all text-text-main"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+
+          {/* Dropdown Menu */}
+          {menuOpen && (
+            <div className="absolute top-12 right-0 w-48 bg-bg-panel border border-border-subtle rounded-2xl shadow-xl p-2 z-50">
+              <Link href="/developer" className="block px-4 py-2 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
+                Developer Area
+              </Link>
+              <button 
+                onClick={() => import("@/lib/firebase").then(m => m.auth.signOut())} 
+                className="w-full text-left px-4 py-2 mt-1 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
