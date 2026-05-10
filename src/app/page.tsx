@@ -18,6 +18,8 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | undefined>(undefined);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const fetchData = async () => {
     try {
       const [active, all] = await Promise.all([getActiveJobs(), getJobs()]);
@@ -27,6 +29,18 @@ export default function Home() {
       console.error("Error fetching data:", error);
     }
   };
+
+  const filteredActiveJobs = activeJobs.filter(job => 
+    job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.paintSpecs.some(spec => 
+      spec.colourName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      spec.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      spec.what.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (spec.notes && spec.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      spec.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -117,6 +131,8 @@ export default function Home() {
             <input
               type="text"
               placeholder="Search jobs, colours, or clients..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-bg-panel-hover border border-border-subtle rounded-2xl py-4 px-14 text-lg text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all shadow-inner"
             />
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 absolute left-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,62 +141,110 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero Tile (Active Job) - 2x2 */}
+        {/* Hero Tile (Active Jobs List) - 2x2 */}
         <div 
-          onClick={() => activeJobs.length > 0 && openEditJobModal(activeJobs[0])}
-          className="glass-panel col-span-1 md:col-span-2 lg:col-span-2 row-span-2 rounded-3xl p-6 md:p-8 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300 group cursor-pointer relative overflow-hidden"
+          className="glass-panel col-span-1 md:col-span-2 lg:col-span-2 row-span-2 rounded-3xl p-6 md:p-8 flex flex-col transition-transform hover:scale-[1.01] duration-300 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-48 h-48 bg-brand/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-brand/20"></div>
-          {activeJobs.length > 0 ? (
-            <>
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="px-4 py-1.5 bg-brand/20 text-brand text-xs font-bold rounded-full uppercase tracking-widest shadow-sm">Active Job</span>
-                  <span className="text-text-muted text-sm font-medium bg-bg-panel px-3 py-1 rounded-full border border-border-subtle">
-                    Due: {new Date(activeJobs[0].dueDate || activeJobs[0].createdAt).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">{activeJobs[0].name}</h2>
-                <p className="text-text-muted text-lg">{activeJobs[0].clientName}</p>
-              </div>
-              <div className="flex gap-3 mt-auto items-center">
-                <div className="flex -space-x-3">
-                  {activeJobs[0].paintSpecs.slice(0, 3).map((spec, i) => (
-                    <div 
-                      key={i} 
-                      className="w-10 h-10 rounded-full border-2 border-bg-base shadow-md relative flex items-center justify-center text-[10px] font-bold text-white/40 uppercase overflow-hidden"
-                      style={{ 
-                        zIndex: 30 - i,
-                        backgroundColor: spec.colourCode || 'var(--bg-panel-hover)'
-                      }}
-                      title={spec.colourName}
-                    >
-                      {!spec.colourCode && spec.manufacturer.charAt(0)}
-                    </div>
-                  ))}
-                </div>
-                {activeJobs[0].paintSpecs.length > 3 && (
-                  <span className="text-sm text-text-muted font-medium ml-2">+{activeJobs[0].paintSpecs.length - 3} more colours</span>
-                )}
-                <div className="flex-1"></div>
-                <div className="w-10 h-10 rounded-full bg-bg-panel flex items-center justify-center group-hover:bg-brand group-hover:text-bg-base transition-colors border border-border-subtle">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center py-10">
-              <p className="text-text-muted mb-4 italic">No active jobs currently</p>
-              <button 
-                onClick={(e) => { e.stopPropagation(); openNewJobModal(); }}
-                className="px-6 py-2 bg-brand/10 text-brand rounded-full text-sm font-bold hover:bg-brand hover:text-bg-base transition-all"
-              >
-                CREATE YOUR FIRST JOB
-              </button>
+          <div className="absolute top-0 right-0 w-48 h-48 bg-brand/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+          
+          <div className="flex items-center justify-between mb-6 z-10">
+            <div className="flex items-center gap-2">
+              <span className="px-4 py-1.5 bg-brand/20 text-brand text-xs font-bold rounded-full uppercase tracking-widest shadow-sm">Active Jobs</span>
+              <span className="text-text-muted text-xs font-bold bg-bg-panel px-3 py-1 rounded-full border border-border-subtle">
+                {filteredActiveJobs.length} FOUND
+              </span>
             </div>
-          )}
+            {filteredActiveJobs.length > 0 && (
+              <span className="text-[10px] font-black text-white/20 uppercase tracking-tighter">Click to edit</span>
+            )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 z-10 space-y-3">
+            {filteredActiveJobs.length > 0 ? (
+              filteredActiveJobs.map((job) => (
+                <div 
+                  key={job.id}
+                  onClick={() => openEditJobModal(job)}
+                  className="bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/10 hover:border-brand/30 transition-all cursor-pointer group"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-lg group-hover:text-brand transition-colors truncate">{job.name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-text-muted text-sm font-medium">{job.clientName}</p>
+                        {job.paintSpecs.length > 0 && (
+                          <>
+                            <span className="w-1 h-1 bg-text-muted rounded-full"></span>
+                            <p className="text-text-muted text-xs bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+                              {job.paintSpecs[0].area}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right ml-4 shrink-0">
+                      <p className="text-[10px] font-bold text-text-muted uppercase">Due</p>
+                      <p className="text-xs font-bold text-white">{new Date(job.dueDate || job.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
+                    </div>
+                  </div>
+                  
+                  {job.paintSpecs.length > 0 && (
+                    <div className="mb-4 bg-black/20 rounded-xl p-3 border border-white/5">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-10 h-10 rounded-xl border border-white/10 shrink-0 shadow-inner"
+                          style={{ backgroundColor: job.paintSpecs[0].colourCode || '#333' }}
+                        />
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold text-brand uppercase tracking-tighter">{job.paintSpecs[0].what || 'General'}</p>
+                          <p className="text-sm font-bold text-white truncate">{job.paintSpecs[0].colourName}</p>
+                          <p className="text-[10px] text-text-muted truncate">{job.paintSpecs[0].manufacturer} {job.paintSpecs[0].range}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {job.paintSpecs.slice(1, 5).map((spec, i) => (
+                          <div 
+                            key={i} 
+                            className="w-6 h-6 rounded-full border border-bg-base shadow-sm"
+                            style={{ backgroundColor: spec.colourCode || '#333', zIndex: 10-i }}
+                            title={`${spec.area}: ${spec.colourName}`}
+                          />
+                        ))}
+                      </div>
+                      {job.paintSpecs.length > 5 && (
+                        <span className="text-[10px] text-text-muted font-bold">+{job.paintSpecs.length - 5} MORE</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {job.imageUrls && job.imageUrls.length > 0 && (
+                         <div className="flex items-center gap-1 text-[10px] font-bold text-text-muted bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                             <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                           </svg>
+                           {job.imageUrls.length}
+                         </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center py-10 opacity-50">
+                <p className="text-text-muted mb-4 italic">No matching jobs found</p>
+                <button 
+                  onClick={openNewJobModal}
+                  className="px-6 py-2 bg-brand/10 text-brand rounded-full text-sm font-bold hover:bg-brand hover:text-bg-base transition-all"
+                >
+                  RECORD A SPEC
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Quick Add - 1x1 */}

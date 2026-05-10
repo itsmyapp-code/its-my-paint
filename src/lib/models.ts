@@ -1,15 +1,18 @@
 export interface PaintSpec {
   id?: string;
+  area: string; // e.g., Kitchen, Bedroom 1, Hallway
+  what: string; // e.g., Walls, Ceiling, Trim, Radiators
   manufacturer: string;
-  range?: string; // e.g. Diamond Matt, Heritage
+  range?: string; // e.g., Diamond Matt, Heritage
   colourName: string;
   colourCode?: string; // Hex code
   finish: string; // e.g., Matt, Eggshell, Satin, Gloss, Masonry
+  notes?: string;
 }
 
 export interface Job {
   id?: string;
-  name: string; // e.g., "1428 Elm Street Exterior"
+  name: string; // Property Name/Address
   clientName: string;
   clientEmail?: string;
   clientPhone?: string;
@@ -18,7 +21,7 @@ export interface Job {
   status: 'active' | 'completed' | 'pending';
   paintSpecs: PaintSpec[];
   imageUrls?: string[];
-  completedImageUrl?: string; // Legacy field for the main proof image
+  completedImageUrl?: string;
   createdAt: Date | string;
   updatedAt: Date | string;
 }

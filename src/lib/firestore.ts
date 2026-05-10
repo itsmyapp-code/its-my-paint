@@ -13,6 +13,7 @@ const ensureDb = () => {
 
 export const createJob = async (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => {
   const database = ensureDb();
+  console.log("Creating job in Firestore:", job);
   const now = new Date().toISOString();
   const newJob = {
     ...job,
@@ -20,6 +21,7 @@ export const createJob = async (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>
     updatedAt: now,
   };
   const docRef = await addDoc(collection(database, JOBS_COLLECTION), newJob);
+  console.log("Job created successfully with ID:", docRef.id);
   return { id: docRef.id, ...newJob };
 };
 

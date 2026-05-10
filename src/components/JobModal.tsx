@@ -29,7 +29,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
   });
 
   const [paintSpecs, setPaintSpecs] = useState<PaintSpec[]>([
-    { manufacturer: "", colourName: "", finish: "Matt" }
+    { area: "", what: "", manufacturer: "", colourName: "", finish: "Matt", notes: "" }
   ]);
 
   const [newImages, setNewImages] = useState<File[]>([]);
@@ -45,7 +45,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
         dueDate: initialJob.dueDate ? new Date(initialJob.dueDate).toISOString().split('T')[0] : "",
         status: initialJob.status,
       });
-      setPaintSpecs(initialJob.paintSpecs.length > 0 ? initialJob.paintSpecs.map(s => ({ ...s, range: s.range || "" })) : [{ manufacturer: "", range: "", colourName: "", finish: "Matt" }]);
+      setPaintSpecs(initialJob.paintSpecs.length > 0 ? initialJob.paintSpecs.map(s => ({ ...s, range: s.range || "", area: s.area || "", what: s.what || "", notes: s.notes || "" })) : [{ area: "", what: "", manufacturer: "", range: "", colourName: "", finish: "Matt", notes: "" }]);
       setExistingImages(initialJob.imageUrls || []);
     } else {
       // Reset for new job
@@ -57,7 +57,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
         dueDate: "",
         status: "active",
       });
-      setPaintSpecs([{ manufacturer: "", range: "", colourName: "", finish: "Matt" }]);
+      setPaintSpecs([{ area: "", what: "", manufacturer: "", range: "", colourName: "", finish: "Matt", notes: "" }]);
       setExistingImages([]);
     }
     setNewImages([]);
@@ -67,7 +67,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
   if (!isOpen) return null;
 
   const handleAddPaintSpec = () => {
-    setPaintSpecs([...paintSpecs, { manufacturer: "", range: "", colourName: "", finish: "Matt" }]);
+    setPaintSpecs([...paintSpecs, { area: "", what: "", manufacturer: "", range: "", colourName: "", finish: "Matt", notes: "" }]);
   };
 
   const handleRemovePaintSpec = (index: number) => {
@@ -111,15 +111,18 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    console.log("Starting job save process...");
     try {
       let jobId = initialJob?.id;
       const filteredSpecs = paintSpecs.filter(spec => spec.manufacturer && spec.colourName);
 
       if (initialJob?.id) {
         // Handle image uploads for existing job
+        console.log(`Uploading ${newImages.length} images for existing job...`);
         const uploadedUrls = await Promise.all(
           newImages.map(file => uploadJobImage(initialJob.id!, file))
         );
+        console.log("Images uploaded:", uploadedUrls);
         
         await updateJob(initialJob.id, {
           ...formData,
@@ -127,7 +130,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
           imageUrls: [...existingImages, ...uploadedUrls],
         });
       } else {
-        // Create new job
+        console.log("Creating new job in Firestore...");
         const result = await createJob({
           ...formData,
           startDate: new Date().toISOString(),
@@ -135,15 +138,19 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
           imageUrls: [], // Images uploaded after creation if needed, but for simplicity we'll just create then upload
         });
         jobId = result.id;
+        console.log("Job created with ID:", jobId);
         
         // Now upload images if any
         if (newImages.length > 0) {
+          console.log(`Uploading ${newImages.length} images for new job...`);
           const uploadedUrls = await Promise.all(
             newImages.map(file => uploadJobImage(jobId!, file))
           );
+          console.log("Images uploaded:", uploadedUrls);
           await updateJob(jobId!, { imageUrls: uploadedUrls });
         }
       }
+      console.log("Save process complete!");
       onSuccess();
       onClose();
     } catch (error) {
@@ -326,6 +333,24 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
                   )}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Area</label>
+                      <input
+                        placeholder="e.g. Kitchen"
+                        value={spec.area}
+                        onChange={(e) => handlePaintSpecChange(index, "area", e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">What</label>
+                      <input
+                        placeholder="e.g. Walls"
+                        value={spec.what}
+                        onChange={(e) => handlePaintSpecChange(index, "what", e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
+                      />
+                    </div>
+                    <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Manufacturer</label>
                       <input
                         placeholder="e.g. Dulux Trade"
@@ -391,6 +416,15 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
                         <option value="Gloss" className="bg-[#1a1a1a]">Gloss</option>
                         <option value="Masonry" className="bg-[#1a1a1a]">Masonry</option>
                       </select>
+                    </div>
+                    <div className="md:col-span-2 space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Notes</label>
+                      <textarea
+                        placeholder="Additional notes for this spec..."
+                        value={spec.notes || ""}
+                        onChange={(e) => handlePaintSpecChange(index, "notes", e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30 min-h-[80px]"
+                      />
                     </div>
                   </div>
                 </div>
