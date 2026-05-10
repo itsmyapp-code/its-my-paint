@@ -109,7 +109,10 @@ export default function Home() {
           {/* Dropdown Menu */}
           {menuOpen && (
             <div className="absolute top-12 right-0 w-48 bg-bg-panel border border-border-subtle rounded-2xl shadow-xl p-2 z-50">
-              <Link href="/developer" className="block px-4 py-2 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
+              <Link href="/settings" className="block px-4 py-2 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
+                Settings
+              </Link>
+              <Link href="/developer" className="block px-4 py-2 mt-1 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
                 Developer Area
               </Link>
               <button 

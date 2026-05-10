@@ -10,8 +10,22 @@ export interface PaintSpec {
   notes?: string;
 }
 
+export interface DecoratorSettings {
+  id?: string;
+  userId: string;
+  businessName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  logoUrl?: string;
+  address?: string;
+  updatedAt: Date | string;
+}
+
 export interface Job {
   id?: string;
+  userId?: string; // Track which decorator owns this job
   name: string; // Property Name/Address
   clientName: string;
   clientEmail?: string;

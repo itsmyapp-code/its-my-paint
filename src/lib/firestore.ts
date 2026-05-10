@@ -1,8 +1,9 @@
-import { collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy, deleteDoc } from 'firebase/firestore';
-import { db } from './firebase';
-import { Job } from './models';
+import { collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy, deleteDoc, setDoc, getDoc, or } from 'firebase/firestore';
+import { db, auth } from './firebase';
+import { Job, DecoratorSettings } from './models';
 
 const JOBS_COLLECTION = 'jobs';
+const SETTINGS_COLLECTION = 'decoratorSettings';
 
 const ensureDb = () => {
   if (!db) {
@@ -13,10 +14,14 @@ const ensureDb = () => {
 
 export const createJob = async (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => {
   const database = ensureDb();
+  const user = auth?.currentUser;
+  if (!user) throw new Error("User must be authenticated to create a job.");
+
   console.log("Creating job in Firestore:", job);
   const now = new Date().toISOString();
   const newJob = {
     ...job,
+    userId: user.uid,
     createdAt: now,
     updatedAt: now,
   };
@@ -27,16 +32,52 @@ export const createJob = async (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>
 
 export const getJobs = async () => {
   const database = ensureDb();
-  const q = query(collection(database, JOBS_COLLECTION), orderBy('createdAt', 'desc'));
+  const user = auth?.currentUser;
+  if (!user) return [];
+  
+  const q = query(
+    collection(database, JOBS_COLLECTION), 
+    or(where('userId', '==', user.uid), where('userId', '==', null)),
+    orderBy('createdAt', 'desc')
+  );
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
 };
 
 export const getActiveJobs = async () => {
   const database = ensureDb();
-  const q = query(collection(database, JOBS_COLLECTION), where('status', '==', 'active'), orderBy('dueDate', 'asc'));
+  const user = auth?.currentUser;
+  if (!user) return [];
+
+  const q = query(
+    collection(database, JOBS_COLLECTION), 
+    or(where('userId', '==', user.uid), where('userId', '==', null)),
+    where('status', '==', 'active'), 
+    orderBy('dueDate', 'asc')
+  );
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+};
+
+export const getDecoratorSettings = async (userId: string): Promise<DecoratorSettings | null> => {
+  const database = ensureDb();
+  const docRef = doc(database, SETTINGS_COLLECTION, userId);
+  const docSnap = await getDoc(docRef);
+  
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() } as DecoratorSettings;
+  }
+  return null;
+};
+
+export const updateDecoratorSettings = async (userId: string, settings: Partial<DecoratorSettings>) => {
+  const database = ensureDb();
+  const docRef = doc(database, SETTINGS_COLLECTION, userId);
+  await setDoc(docRef, { 
+    ...settings, 
+    userId, 
+    updatedAt: new Date().toISOString() 
+  }, { merge: true });
 };
 
 export const updateJob = async (id: string, updates: Partial<Job>) => {

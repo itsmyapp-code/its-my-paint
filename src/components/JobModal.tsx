@@ -6,6 +6,7 @@ import { Job, PaintSpec } from "@/lib/models";
 import { uploadJobImage } from "@/lib/storage";
 import { UK_PAINT_MANUFACTURERS, GET_RANGES_FOR_MANUFACTURER } from "@/lib/constants";
 import Image from "next/image";
+import Link from "next/link";
 
 interface JobModalProps {
   isOpen: boolean;
@@ -436,6 +437,15 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
         <div className="p-6 border-t border-white/10 flex flex-col sm:flex-row gap-3 bg-white/5">
           {initialJob && (
             <div className="flex gap-3 w-full sm:w-auto">
+              <Link 
+                href={`/report/${initialJob.id}`}
+                className="w-full sm:w-12 h-12 flex items-center justify-center border border-brand/30 text-brand rounded-xl hover:bg-brand hover:text-bg-base transition-all"
+                title="View Professional Report"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
+                </svg>
+              </Link>
               {deleteConfirm ? (
                 <div className="flex gap-2 w-full">
                   <button 

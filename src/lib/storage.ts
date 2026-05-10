@@ -71,3 +71,24 @@ export const uploadJobImage = async (jobId: string, file: File): Promise<string>
   await uploadBytes(storageRef, webpBlob, metadata);
   return getDownloadURL(storageRef);
 };
+
+/**
+ * Uploads a decorator business logo to Firebase Storage.
+ */
+export const uploadDecoratorLogo = async (userId: string, file: File): Promise<string> => {
+  if (!storage) {
+    throw new Error("Firebase Storage is not initialized.");
+  }
+  
+  // We'll keep logos as original format or WebP? Let's use WebP to be consistent.
+  const webpBlob = await convertToWebP(file);
+  const storageRef = ref(storage, `users/${userId}/logo.webp`);
+  
+  const metadata = {
+    contentType: 'image/webp',
+    cacheControl: 'public,max-age=31536000',
+  };
+  
+  await uploadBytes(storageRef, webpBlob, metadata);
+  return getDownloadURL(storageRef);
+};
