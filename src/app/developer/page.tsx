@@ -170,7 +170,7 @@ export default function DeveloperPage() {
             </div>
             
             <p className="mt-4 text-[10px] text-text-muted uppercase tracking-widest font-bold text-center">
-              Standard Template: Manufacturer | Range | Colour Name | Finish
+              Standard Template: Area | What | Manufacturer | Range | Colour Name | Finish | Notes
             </p>
           </div>
         </div>
