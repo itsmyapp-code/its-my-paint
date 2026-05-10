@@ -4,7 +4,7 @@ import { Job, PaintSpec } from "./models";
  * Exports jobs to a CSV string and triggers a download.
  */
 export const exportJobsToCSV = (jobs: Job[]) => {
-  const headers = ["Job Name", "Client Name", "Client Email", "Due Date", "Status", "Manufacturer", "Range", "Colour Name", "Finish"];
+  const headers = ["Job Name", "Client Name", "Client Email", "Due Date", "Status", "Area", "What", "Manufacturer", "Range", "Colour Name", "Finish", "Notes"];
   
   const rows = jobs.flatMap(job => {
     // If no paint specs, still show the job info
@@ -18,6 +18,9 @@ export const exportJobsToCSV = (jobs: Job[]) => {
         "",
         "",
         "",
+        "",
+        "",
+        "",
         ""
       ]];
     }
@@ -28,10 +31,13 @@ export const exportJobsToCSV = (jobs: Job[]) => {
       job.clientEmail || "",
       job.dueDate ? new Date(job.dueDate).toISOString().split('T')[0] : "",
       job.status,
+      spec.area || "",
+      spec.what || "",
       spec.manufacturer,
       spec.range || "",
       spec.colourName,
-      spec.finish
+      spec.finish,
+      spec.notes || ""
     ]);
   });
 
@@ -82,10 +88,13 @@ export const parseCSVToJobs = (csvText: string): Partial<Job>[] => {
 
     if (row["Manufacturer"] && row["Colour Name"]) {
       const spec: PaintSpec = {
+        area: row["Area"] || "General",
+        what: row["What"] || "Surface",
         manufacturer: row["Manufacturer"],
         range: row["Range"] || "",
         colourName: row["Colour Name"],
-        finish: row["Finish"] || "Matt"
+        finish: row["Finish"] || "Matt",
+        notes: row["Notes"] || ""
       };
       jobsMap[jobName].paintSpecs?.push(spec);
     }
