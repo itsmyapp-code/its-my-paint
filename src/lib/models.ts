@@ -1,9 +1,9 @@
 export interface PaintSpec {
   id?: string;
   manufacturer: string;
-  range?: string;
+  range?: string; // e.g. Diamond Matt, Heritage
   colourName: string;
-  colourCode?: string;
+  colourCode?: string; // Hex code
   finish: string; // e.g., Matt, Eggshell, Satin, Gloss, Masonry
 }
 

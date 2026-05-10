@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createJob, updateJob, deleteJob } from "@/lib/firestore";
 import { Job, PaintSpec } from "@/lib/models";
 import { uploadJobImage } from "@/lib/storage";
+import { UK_PAINT_MANUFACTURERS, GET_RANGES_FOR_MANUFACTURER } from "@/lib/constants";
 import Image from "next/image";
 
 interface JobModalProps {
@@ -44,7 +45,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
         dueDate: initialJob.dueDate ? new Date(initialJob.dueDate).toISOString().split('T')[0] : "",
         status: initialJob.status,
       });
-      setPaintSpecs(initialJob.paintSpecs.length > 0 ? initialJob.paintSpecs : [{ manufacturer: "", colourName: "", finish: "Matt" }]);
+      setPaintSpecs(initialJob.paintSpecs.length > 0 ? initialJob.paintSpecs.map(s => ({ ...s, range: s.range || "" })) : [{ manufacturer: "", range: "", colourName: "", finish: "Matt" }]);
       setExistingImages(initialJob.imageUrls || []);
     } else {
       // Reset for new job
@@ -56,7 +57,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
         dueDate: "",
         status: "active",
       });
-      setPaintSpecs([{ manufacturer: "", colourName: "", finish: "Matt" }]);
+      setPaintSpecs([{ manufacturer: "", range: "", colourName: "", finish: "Matt" }]);
       setExistingImages([]);
     }
     setNewImages([]);
@@ -66,7 +67,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
   if (!isOpen) return null;
 
   const handleAddPaintSpec = () => {
-    setPaintSpecs([...paintSpecs, { manufacturer: "", colourName: "", finish: "Matt" }]);
+    setPaintSpecs([...paintSpecs, { manufacturer: "", range: "", colourName: "", finish: "Matt" }]);
   };
 
   const handleRemovePaintSpec = (index: number) => {
@@ -327,16 +328,33 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Manufacturer</label>
                       <input
-                        placeholder="e.g. Dulux / Crown"
+                        placeholder="e.g. Dulux Trade"
+                        list={`manufacturers-${index}`}
                         value={spec.manufacturer}
                         onChange={(e) => handlePaintSpecChange(index, "manufacturer", e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
                       />
+                      <datalist id={`manufacturers-${index}`}>
+                        {UK_PAINT_MANUFACTURERS.map(m => <option key={m.name} value={m.name} />)}
+                      </datalist>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Range</label>
+                      <input
+                        placeholder="e.g. Diamond Matt"
+                        list={`ranges-${index}`}
+                        value={spec.range || ""}
+                        onChange={(e) => handlePaintSpecChange(index, "range", e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
+                      />
+                      <datalist id={`ranges-${index}`}>
+                        {GET_RANGES_FOR_MANUFACTURER(spec.manufacturer).map(r => <option key={r} value={r} />)}
+                      </datalist>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase tracking-tighter text-white/40 ml-1">Colour Name</label>
                       <input
-                        placeholder="e.g. Magnolia / Polished Pebble"
+                        placeholder="e.g. Magnolia"
                         value={spec.colourName}
                         onChange={(e) => handlePaintSpecChange(index, "colourName", e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand/30"
