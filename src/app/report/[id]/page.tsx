@@ -108,28 +108,30 @@ export default function ReportPage() {
     <div className="min-h-screen bg-gray-50 print:bg-white pb-20">
       <style jsx global>{`
         @media print {
-          /* Hide browser headers/footers by setting margin to 0 */
-          @page {
-            margin: 0;
-            size: auto;
-          }
-          
-          /* Add padding back to the body so content doesn't hit the edge */
-          body {
-            padding: 15mm;
-            background: white !important;
-          }
+          @page { margin: 10mm; size: a4; }
+          body { background: white !important; }
+          .print\:hidden { display: none !important; }
+        }
+        
+        /* Force standard colors for PDF generation to avoid oklch errors from Tailwind 4 */
+        #report-content {
+          --color-brand: #F59E0B !important;
+          --color-brand-hover: #D97706 !important;
+          --color-gray-50: #f9fafb !important;
+          --color-gray-100: #f3f4f6 !important;
+          --color-gray-200: #e5e7eb !important;
+          --color-gray-400: #9ca3af !important;
+          --color-gray-500: #6b7280 !important;
+          --color-gray-600: #4b5563 !important;
+          --color-gray-700: #374151 !important;
+          --color-gray-800: #1f2937 !important;
+          --color-gray-900: #111827 !important;
+          color-scheme: light !important;
+        }
 
-          /* Hide app footer and control bars */
-          nav, footer, .print-hidden, .sticky {
-            display: none !important;
-          }
-
-          .glass-panel {
-            border: none !important;
-            background: transparent !important;
-            box-shadow: none !important;
-          }
+        #report-content * {
+          --tw-ring-color: rgba(0,0,0,0) !important;
+          --tw-shadow: 0 0 #0000 !important;
         }
       `}</style>
 
