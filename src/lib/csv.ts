@@ -105,7 +105,7 @@ export const parseCSVToJobs = (csvText: string): Partial<Job>[] => {
         clientName: values[idx.clientName] || "Unknown",
         clientEmail: values[idx.clientEmail] || "",
         dueDate: values[idx.dueDate] || "",
-        status: (values[idx.status]?.toLowerCase() === "completed" ? "completed" : "active") as any,
+        status: (values[idx.status]?.toLowerCase() === "active" ? "active" : "archive") as any,
         paintSpecs: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

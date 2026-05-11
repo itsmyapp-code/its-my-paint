@@ -32,7 +32,7 @@ export interface Job {
   clientPhone?: string;
   startDate: Date | string;
   dueDate?: Date | string;
-  status: 'active' | 'completed' | 'pending';
+  status: 'active' | 'completed' | 'pending' | 'archive';
   paintSpecs: PaintSpec[];
   imageUrls?: string[];
   completedImageUrl?: string;

@@ -214,6 +214,19 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
                 />
               </div>
               <div className="space-y-1.5">
+                <label className="text-sm font-medium text-white/60 ml-1">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as Job["status"] })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand/50 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="active" className="bg-[#1a1a1a]">Active</option>
+                  <option value="archive" className="bg-[#1a1a1a]">Archive</option>
+                  <option value="completed" className="bg-[#1a1a1a]">Completed</option>
+                  <option value="pending" className="bg-[#1a1a1a]">Pending</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium text-white/60 ml-1">Contact Info (Optional)</label>
                 <input
                   value={formData.clientEmail}
