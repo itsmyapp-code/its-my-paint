@@ -40,7 +40,9 @@ export default function Home() {
         (spec.manufacturer && spec.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     
-    const matchesStatus = job.status === view;
+    const matchesStatus = view === 'active' 
+      ? (job.status === 'active' || job.status === 'pending')
+      : (job.status === 'archive' || job.status === 'completed');
     return matchesSearch && matchesStatus;
   });
 
@@ -200,7 +202,12 @@ export default function Home() {
                   >
                     {/* Status Badge */}
                     <div className="absolute top-4 right-4 z-10">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm ${job.status === 'active' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/20 text-amber-500 border border-amber-500/20'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm ${
+                        job.status === 'active' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' :
+                        job.status === 'pending' ? 'bg-blue-500/20 text-blue-500 border border-blue-500/20' :
+                        job.status === 'completed' ? 'bg-purple-500/20 text-purple-500 border border-purple-500/20' :
+                        'bg-amber-500/20 text-amber-500 border border-amber-500/20'
+                      }`}>
                         {job.status}
                       </span>
                     </div>
@@ -255,13 +262,18 @@ export default function Home() {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (job.id) {
-                              updateJob(job.id, { status: job.status === 'active' ? 'archive' : 'active' }).then(fetchData);
+                              const newStatus = (job.status === 'active' || job.status === 'pending') ? 'archive' : 'active';
+                              updateJob(job.id, { status: newStatus }).then(fetchData);
                             }
                           }}
-                          className={`p-2 rounded-xl border transition-all ${job.status === 'active' ? 'border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-white' : 'border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white'}`}
-                          title={job.status === 'active' ? 'Archive Job' : 'Restore to Active'}
+                          className={`p-2 rounded-xl border transition-all ${
+                            (job.status === 'active' || job.status === 'pending') 
+                              ? 'border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-white' 
+                              : 'border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white'
+                          }`}
+                          title={(job.status === 'active' || job.status === 'pending') ? 'Archive Job' : 'Restore to Active'}
                         >
-                          {job.status === 'active' ? (
+                          {(job.status === 'active' || job.status === 'pending') ? (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                             </svg>
