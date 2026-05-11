@@ -19,6 +19,7 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
   const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -241,12 +242,30 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
                 </svg>
                 UPLOAD
               </button>
+              <button 
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                className="text-xs font-bold text-brand hover:text-brand/80 transition-colors flex items-center gap-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                </svg>
+                CAMERA
+              </button>
               <input 
                 type="file" 
                 ref={fileInputRef} 
                 className="hidden" 
                 accept="image/*" 
                 multiple 
+                onChange={handleFileChange}
+              />
+              <input 
+                type="file" 
+                ref={cameraInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                capture="environment" 
                 onChange={handleFileChange}
               />
             </div>
@@ -438,12 +457,12 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
           {initialJob && (
             <div className="flex gap-3 w-full sm:w-auto">
               <Link 
-                href={`/report/${initialJob.id}`}
+                href={`/report/${initialJob.id}?download=true`}
                 className="w-full sm:w-12 h-12 flex items-center justify-center border border-brand/30 text-brand rounded-xl hover:bg-brand hover:text-bg-base transition-all"
-                title="View Professional Report"
+                title="Download PDF Report"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </Link>
               {deleteConfirm ? (

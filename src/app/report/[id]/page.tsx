@@ -35,6 +35,13 @@ export default function ReportPage() {
       const foundJob = jobs.find(j => j.id === jobId);
       if (foundJob) {
         setJob(foundJob);
+        // Check for download parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('download') === 'true') {
+          setTimeout(() => {
+            handleDownloadPDF(foundJob);
+          }, 1000);
+        }
       }
       if (decoratorSettings) {
         setSettings(decoratorSettings);
@@ -44,6 +51,33 @@ export default function ReportPage() {
     } finally {
       setFetching(false);
     }
+  };
+
+  const handleDownloadPDF = async (jobToDownload?: Job) => {
+    const targetJob = jobToDownload || job;
+    if (!targetJob) return;
+
+    // Use dynamic import for html2pdf.js to avoid SSR issues
+    const html2pdf = (await import('html2pdf.js')).default;
+    const element = document.getElementById('report-content');
+    
+    if (!element) return;
+
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: `Paint_Spec_${targetJob.name.replace(/\s+/g, '_')}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).save().then(() => {
+      // If we came here via download=true, we might want to close the tab or go back
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('download') === 'true') {
+        // Option: router.push('/') or window.close()
+      }
+    });
   };
 
   if (loading || fetching) {
@@ -101,18 +135,18 @@ export default function ReportPage() {
           Dashboard
         </button>
         <button 
-          onClick={() => window.print()} 
+          onClick={() => handleDownloadPDF()} 
           className="bg-brand text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand/20"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
           </svg>
-          PRINT REPORT
+          DOWNLOAD PDF
         </button>
       </div>
 
       {/* Report Content */}
-      <div className="w-full md:max-w-[210mm] mx-auto bg-white shadow-2xl my-8 print:my-0 print:shadow-none min-h-screen md:min-h-[297mm] p-4 md:p-[20mm]">
+      <div id="report-content" className="w-full md:max-w-[210mm] mx-auto bg-white shadow-2xl my-8 print:my-0 print:shadow-none min-h-screen md:min-h-[297mm] p-4 md:p-[20mm]">
         {/* Report Header */}
         <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8">
           <div>

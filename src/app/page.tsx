@@ -276,6 +276,63 @@ export default function Home() {
           <p className="text-text-muted text-sm mt-1">Record a paint spec</p>
         </div>
 
+        {/* Stats Tile - 1x1 */}
+        <div className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300 relative overflow-hidden group">
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-brand/5 rounded-full blur-2xl group-hover:bg-brand/10 transition-colors"></div>
+          <div>
+            <p className="text-[10px] font-black text-brand uppercase tracking-widest mb-1">Total Jobs</p>
+            <h3 className="text-4xl font-black text-white">{allJobs.length}</h3>
+          </div>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-[10px] font-bold text-text-muted uppercase">Completed</p>
+              <p className="text-sm font-bold text-white">{allJobs.filter(j => j.status === 'completed').length}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold text-text-muted uppercase">Active</p>
+              <p className="text-sm font-bold text-brand">{activeJobs.length}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Colours Tile - 1x1 */}
+        <div className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300 group">
+          <p className="text-[10px] font-black text-brand uppercase tracking-widest mb-2">Recent Colours</p>
+          <div className="flex flex-wrap gap-2">
+            {allJobs.flatMap(j => j.paintSpecs).slice(0, 8).map((spec, i) => (
+              <div 
+                key={i} 
+                className="w-8 h-8 rounded-lg border border-white/10 shadow-sm transition-transform hover:scale-110"
+                style={{ backgroundColor: spec.colourCode || '#333' }}
+                title={spec.colourName}
+              />
+            ))}
+            {allJobs.flatMap(j => j.paintSpecs).length === 0 && (
+              <p className="text-xs text-text-muted italic">No colours yet</p>
+            )}
+          </div>
+          <div className="mt-2">
+            <p className="text-[10px] font-bold text-text-muted uppercase">Unique Brands</p>
+            <p className="text-sm font-bold text-white">
+              {new Set(allJobs.flatMap(j => j.paintSpecs).map(s => s.manufacturer)).size}
+            </p>
+          </div>
+        </div>
+
+        {/* Reports Tile - 1x1 */}
+        <Link 
+          href="/developer"
+          className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.02] duration-300 cursor-pointer group hover:border-brand/50"
+        >
+          <div className="w-12 h-12 bg-bg-panel-hover rounded-xl flex items-center justify-center mb-3 group-hover:text-brand transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 className="font-bold text-sm uppercase tracking-widest">Advanced Tools</h3>
+          <p className="text-[10px] text-text-muted mt-1 uppercase">CSV Export & Import</p>
+        </Link>
+
         <JobModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 

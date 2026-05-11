@@ -13,6 +13,24 @@ export default function DeveloperPage() {
   const router = useRouter();
   const [importing, setImporting] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const [stats, setStats] = useState({ totalJobs: 0, totalSpecs: 0, manufacturers: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const jobs = await getJobs();
+        const specs = jobs.flatMap(j => j.paintSpecs);
+        setStats({
+          totalJobs: jobs.length,
+          totalSpecs: specs.length,
+          manufacturers: new Set(specs.map(s => s.manufacturer)).size
+        });
+      } catch (error) {
+        console.error("Failed to fetch developer stats:", error);
+      }
+    };
+    if (user) fetchStats();
+  }, [user]);
 
   // Redirect if not logged in or not the developer
   useEffect(() => {
@@ -104,9 +122,22 @@ export default function DeveloperPage() {
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl text-left">
-            <div className="bg-bg-panel border border-border-subtle rounded-xl p-5 hover:border-brand/50 transition-colors cursor-pointer group">
-              <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors mb-1">Telemetry Metrics</h3>
-              <p className="text-sm text-text-muted">View user engagement and app performance data.</p>
+            <div className="bg-bg-panel border border-border-subtle rounded-xl p-5 hover:border-brand/50 transition-colors group">
+              <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors mb-1">System Stats</h3>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="text-center">
+                  <p className="text-[10px] text-text-muted uppercase font-bold">Jobs</p>
+                  <p className="text-lg font-black text-brand">{stats.totalJobs}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] text-text-muted uppercase font-bold">Specs</p>
+                  <p className="text-lg font-black text-white">{stats.totalSpecs}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] text-text-muted uppercase font-bold">Brands</p>
+                  <p className="text-lg font-black text-white">{stats.manufacturers}</p>
+                </div>
+              </div>
             </div>
             <div className="bg-bg-panel border border-border-subtle rounded-xl p-5 hover:border-brand/50 transition-colors cursor-pointer group">
               <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors mb-1">Feature Flags</h3>
