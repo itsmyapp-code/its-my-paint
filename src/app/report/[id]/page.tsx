@@ -110,39 +110,63 @@ export default function ReportPage() {
         @media print {
           @page { margin: 10mm; size: a4; }
           body { background: white !important; }
-          .print\:hidden { display: none !important; }
+          .print\\:hidden { display: none !important; }
         }
         
-        /* Force standard colors for PDF generation to avoid oklch errors from Tailwind 4 */
-        #report-content {
+        /* Aggressive override for PDF compatibility */
+        #report-content, #report-content * {
+          color-scheme: light !important;
+          /* Strip all modern color spaces which break html2canvas */
           --color-brand: #F59E0B !important;
           --color-brand-hover: #D97706 !important;
           --color-gray-50: #f9fafb !important;
           --color-gray-100: #f3f4f6 !important;
           --color-gray-200: #e5e7eb !important;
+          --color-gray-300: #d1d5db !important;
           --color-gray-400: #9ca3af !important;
           --color-gray-500: #6b7280 !important;
           --color-gray-600: #4b5563 !important;
           --color-gray-700: #374151 !important;
           --color-gray-800: #1f2937 !important;
           --color-gray-900: #111827 !important;
-          color-scheme: light !important;
+          
+          /* Force standard colors for any element that might use oklab/oklch */
+          color: inherit;
+          background-color: transparent;
         }
+
+        #report-content .text-gray-900 { color: #111827 !important; }
+        #report-content .text-gray-700 { color: #374151 !important; }
+        #report-content .text-gray-600 { color: #4b5563 !important; }
+        #report-content .text-gray-500 { color: #6b7280 !important; }
+        #report-content .text-gray-400 { color: #9ca3af !important; }
+        #report-content .text-brand { color: #F59E0B !important; }
+        #report-content .bg-gray-50 { background-color: #f9fafb !important; }
+        #report-content .bg-gray-900 { background-color: #111827 !important; }
+        #report-content .bg-brand { background-color: #F59E0B !important; }
+        #report-content .border-gray-100 { border-color: #f3f4f6 !important; }
+        #report-content .border-gray-200 { border-color: #e5e7eb !important; }
+        #report-content .border-brand { border-color: #F59E0B !important; }
 
         #report-content * {
           --tw-ring-color: rgba(0,0,0,0) !important;
           --tw-shadow: 0 0 #0000 !important;
+          --tw-backdrop-blur: none !important;
         }
       `}</style>
 
       {/* Control Bar */}
       <div className="sticky top-0 z-[100] bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center print:hidden shadow-sm">
-        <Link href="/" className="flex items-center gap-2 text-gray-600 font-medium hover:text-brand transition-colors">
+        <a 
+          href="/" 
+          className="flex items-center gap-2 text-gray-600 font-medium hover:text-brand transition-colors cursor-pointer"
+          style={{ position: 'relative', zIndex: 110 }}
+        >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
           </svg>
           Dashboard
-        </Link>
+        </a>
         <button 
           onClick={() => handleDownloadPDF()} 
           disabled={isGenerating}
