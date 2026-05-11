@@ -17,6 +17,7 @@ export default function ReportPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [settings, setSettings] = useState<DecoratorSettings | null>(null);
   const [fetching, setFetching] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -57,29 +58,33 @@ export default function ReportPage() {
   const handleDownloadPDF = async (jobToDownload?: Job) => {
     const targetJob = jobToDownload || job;
     if (!targetJob) return;
+    setIsGenerating(true);
 
-    // Use dynamic import for html2pdf.js to avoid SSR issues
-    const html2pdfModule = await import('html2pdf.js');
-    const html2pdf = html2pdfModule.default || html2pdfModule;
-    const element = document.getElementById('report-content');
-    
-    if (!element) return;
+    try {
+      // Small delay to let the UI update and show the loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-    const opt = {
-      margin: [10, 10, 10, 10] as [number, number, number, number],
-      filename: `Paint_Spec_${targetJob.name.replace(/\s+/g, '_')}.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-    };
+      // Use dynamic import for html2pdf.js to avoid SSR issues
+      const html2pdfModule = await import('html2pdf.js');
+      const html2pdf = html2pdfModule.default || html2pdfModule;
+      const element = document.getElementById('report-content');
+      
+      if (!element) return;
 
-    html2pdf().from(element).set(opt).save().then(() => {
-      // If we came here via download=true, we might want to close the tab or go back
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('download') === 'true') {
-        // Option: router.push('/') or window.close()
-      }
-    });
+      const opt = {
+        margin: [10, 10, 10, 10] as [number, number, number, number],
+        filename: `Paint_Spec_${targetJob.name.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+      };
+
+      await html2pdf().from(element).set(opt).save();
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (loading || fetching) {
@@ -138,14 +143,33 @@ export default function ReportPage() {
         </Link>
         <button 
           onClick={() => handleDownloadPDF()} 
-          className="bg-brand hover:bg-brand/90 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand/20 transition-all active:scale-95"
+          disabled={isGenerating}
+          className={`${isGenerating ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand hover:bg-brand/90'} text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand/20 transition-all active:scale-95`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-          DOWNLOAD PDF
+          {isGenerating ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              GENERATING...
+            </>
+          ) : (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              DOWNLOAD PDF
+            </>
+          )}
         </button>
       </div>
+
+      {/* Generating Overlay */}
+      {isGenerating && (
+        <div className="fixed inset-0 z-[200] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center print:hidden">
+          <div className="w-16 h-16 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-xl font-bold text-gray-900">Preparing Your Report...</p>
+          <p className="text-gray-500">This may take a few seconds for larger jobs.</p>
+        </div>
+      )}
 
       {/* Report Content */}
       <div id="report-content" className="w-full md:max-w-[210mm] mx-auto bg-white shadow-2xl my-8 print:my-0 print:shadow-none min-h-screen md:min-h-[297mm] p-4 md:p-[20mm]">

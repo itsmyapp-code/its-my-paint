@@ -61,44 +61,64 @@ export const parseCSVToJobs = (csvText: string): Partial<Job>[] => {
   if (lines.length < 2) return [];
 
   const headers = lines[0].split(",").map(h => h.replace(/"/g, "").trim());
-  const jobsMap: Record<string, Partial<Job>> = {};
+  const jobs: Partial<Job>[] = [];
+
+  // Helper to find column index regardless of exact casing or small typos
+  const getCol = (name: string) => {
+    const n = name.toLowerCase();
+    return headers.findIndex(h => {
+      const hh = h.toLowerCase();
+      return hh === n || hh.includes(n) || n.includes(hh);
+    });
+  };
+
+  const idx = {
+    jobName: getCol("Job Name"),
+    clientName: getCol("Client Name"),
+    clientEmail: getCol("Client Email"),
+    dueDate: getCol("Due Date"),
+    status: getCol("Status"),
+    area: getCol("Area"),
+    what: getCol("What"),
+    manufacturer: getCol("Manufact"), // Handles Manufacturer, Manufacyu, etc.
+    range: getCol("Range"),
+    colourName: getCol("Colour Name"),
+    finish: getCol("Finish"),
+    notes: getCol("Notes")
+  };
 
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     
-    // Simple split (doesn't handle commas inside quotes perfectly, but sufficient for this template)
     const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/"/g, "").trim());
     
-    const row: any = {};
-    headers.forEach((h, idx) => { row[h] = values[idx]; });
-
-    const jobName = row["Job Name"];
+    const jobName = values[idx.jobName];
     if (!jobName) continue;
 
-    if (!jobsMap[jobName]) {
-      jobsMap[jobName] = {
-        name: jobName,
-        clientName: row["Client Name"] || "Unknown",
-        clientEmail: row["Client Email"] || "",
-        dueDate: row["Due Date"] || "",
-        status: (row["Status"]?.toLowerCase() === "completed" ? "completed" : "active") as any,
-        paintSpecs: []
-      };
+    const paintSpecs: PaintSpec[] = [];
+    if (values[idx.manufacturer] && values[idx.colourName]) {
+      paintSpecs.push({
+        area: values[idx.area] || "General",
+        what: values[idx.what] || "Surface",
+        manufacturer: values[idx.manufacturer],
+        range: values[idx.range] || "",
+        colourName: values[idx.colourName],
+        finish: values[idx.finish] || "Matt",
+        notes: values[idx.notes] || ""
+      });
     }
 
-    if (row["Manufacturer"] && row["Colour Name"]) {
-      const spec: PaintSpec = {
-        area: row["Area"] || "General",
-        what: row["What"] || "Surface",
-        manufacturer: row["Manufacturer"],
-        range: row["Range"] || "",
-        colourName: row["Colour Name"],
-        finish: row["Finish"] || "Matt",
-        notes: row["Notes"] || ""
-      };
-      jobsMap[jobName].paintSpecs?.push(spec);
-    }
+    jobs.push({
+      name: jobName,
+      clientName: values[idx.clientName] || "Unknown",
+      clientEmail: values[idx.clientEmail] || "",
+      dueDate: values[idx.dueDate] || "",
+      status: (values[idx.status]?.toLowerCase() === "completed" ? "completed" : "active") as any,
+      paintSpecs: paintSpecs,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
   }
 
-  return Object.values(jobsMap);
+  return jobs;
 };
