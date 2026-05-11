@@ -61,7 +61,7 @@ export const parseCSVToJobs = (csvText: string): Partial<Job>[] => {
   if (lines.length < 2) return [];
 
   const headers = lines[0].split(",").map(h => h.replace(/"/g, "").trim());
-  const jobs: Partial<Job>[] = [];
+  const jobsMap: Record<string, Partial<Job>> = {};
 
   // Helper to find column index regardless of exact casing or small typos
   const getCol = (name: string) => {
@@ -80,7 +80,7 @@ export const parseCSVToJobs = (csvText: string): Partial<Job>[] => {
     status: getCol("Status"),
     area: getCol("Area"),
     what: getCol("What"),
-    manufacturer: getCol("Manufact"), // Handles Manufacturer, Manufacyu, etc.
+    manufacturer: getCol("Manufact"),
     range: getCol("Range"),
     colourName: getCol("Colour Name"),
     finish: getCol("Finish"),
@@ -93,11 +93,27 @@ export const parseCSVToJobs = (csvText: string): Partial<Job>[] => {
     const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/"/g, "").trim());
     
     const jobName = values[idx.jobName];
+    const dueDate = values[idx.dueDate] || "NoDate";
     if (!jobName) continue;
 
-    const paintSpecs: PaintSpec[] = [];
+    // Unique key is Name + Date to keep different dates separate
+    const groupKey = `${jobName}_${dueDate}`;
+
+    if (!jobsMap[groupKey]) {
+      jobsMap[groupKey] = {
+        name: jobName,
+        clientName: values[idx.clientName] || "Unknown",
+        clientEmail: values[idx.clientEmail] || "",
+        dueDate: values[idx.dueDate] || "",
+        status: (values[idx.status]?.toLowerCase() === "completed" ? "completed" : "active") as any,
+        paintSpecs: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
     if (values[idx.manufacturer] && values[idx.colourName]) {
-      paintSpecs.push({
+      jobsMap[groupKey].paintSpecs?.push({
         area: values[idx.area] || "General",
         what: values[idx.what] || "Surface",
         manufacturer: values[idx.manufacturer],
@@ -107,18 +123,7 @@ export const parseCSVToJobs = (csvText: string): Partial<Job>[] => {
         notes: values[idx.notes] || ""
       });
     }
-
-    jobs.push({
-      name: jobName,
-      clientName: values[idx.clientName] || "Unknown",
-      clientEmail: values[idx.clientEmail] || "",
-      dueDate: values[idx.dueDate] || "",
-      status: (values[idx.status]?.toLowerCase() === "completed" ? "completed" : "active") as any,
-      paintSpecs: paintSpecs,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    });
   }
 
-  return jobs;
+  return Object.values(jobsMap);
 };
