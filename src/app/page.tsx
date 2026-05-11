@@ -17,7 +17,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState("");
-  const [view, setView] = useState<'active' | 'archive'>('active');
+  const [view, setView] = useState<'active' | 'archive' | 'reports'>('active');
 
   const fetchData = async () => {
     try {
@@ -40,9 +40,11 @@ export default function Home() {
         (spec.manufacturer && spec.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     
-    const matchesStatus = view === 'active' 
-      ? (job.status === 'active' || job.status === 'pending')
-      : (job.status === 'archive' || job.status === 'completed');
+    const matchesStatus = 
+      view === 'active' ? (job.status === 'active' || job.status === 'pending') :
+      view === 'archive' ? (job.status === 'archive') :
+      (job.status === 'completed');
+
     return matchesSearch && matchesStatus;
   });
 
@@ -158,13 +160,19 @@ export default function Home() {
       </div>
 
       <main className="space-y-6">
-        {/* Active/Archive Toggle */}
+        {/* Dashboard Tabs Toggle */}
         <div className="flex gap-2 p-1.5 bg-bg-panel border border-border-subtle rounded-2xl w-fit">
           <button 
             onClick={() => setView('active')}
             className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${view === 'active' ? 'bg-brand text-bg-base shadow-lg shadow-brand/20' : 'text-text-muted hover:text-text-main'}`}
           >
             ACTIVE
+          </button>
+          <button 
+            onClick={() => setView('reports')}
+            className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${view === 'reports' ? 'bg-brand text-bg-base shadow-lg shadow-brand/20' : 'text-text-muted hover:text-text-main'}`}
+          >
+            REPORTS
           </button>
           <button 
             onClick={() => setView('archive')}
@@ -262,18 +270,18 @@ export default function Home() {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (job.id) {
-                              const newStatus = (job.status === 'active' || job.status === 'pending') ? 'archive' : 'active';
+                              const newStatus = (view === 'active' || view === 'reports') ? 'archive' : 'active';
                               updateJob(job.id, { status: newStatus }).then(fetchData);
                             }
                           }}
                           className={`p-2 rounded-xl border transition-all ${
-                            (job.status === 'active' || job.status === 'pending') 
+                            (view === 'active' || view === 'reports') 
                               ? 'border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-white' 
                               : 'border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white'
                           }`}
-                          title={(job.status === 'active' || job.status === 'pending') ? 'Archive Job' : 'Restore to Active'}
+                          title={(view === 'active' || view === 'reports') ? 'Archive Job' : 'Restore to Active'}
                         >
-                          {(job.status === 'active' || job.status === 'pending') ? (
+                          {(view === 'active' || view === 'reports') ? (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                             </svg>
