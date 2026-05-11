@@ -113,7 +113,7 @@ export default function Home() {
                 Settings
               </Link>
               <Link href="/developer" className="block px-4 py-2 mt-1 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
-                Developer Area
+                Advanced Tools
               </Link>
               <button 
                 onClick={() => import("@/lib/firebase").then(m => m.auth?.signOut())} 
@@ -130,23 +130,34 @@ export default function Home() {
       <main className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[160px]">
         {/* Search */}
         <div className="glass-panel col-span-1 md:col-span-3 lg:col-span-4 row-span-1 rounded-3xl p-6 flex flex-col justify-center transition-transform hover:scale-[1.01] duration-300">
-          <div className="relative w-full max-w-3xl mx-auto flex items-center">
-            <input
-              type="text"
-              placeholder="Search jobs, colours, or clients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-bg-panel-hover border border-border-subtle rounded-2xl py-4 px-14 text-lg text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all shadow-inner"
-            />
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 absolute left-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+          <div className="relative w-full max-w-5xl mx-auto flex items-center gap-4">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search jobs, colours, or clients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-bg-panel-hover border border-border-subtle rounded-2xl py-4 px-14 text-lg text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all shadow-inner"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 absolute left-5 top-1/2 -translate-y-1/2 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <button 
+              onClick={openNewJobModal}
+              className="bg-brand hover:bg-brand/90 text-bg-base font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-brand/20 flex items-center gap-2 whitespace-nowrap"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              NEW JOB
+            </button>
           </div>
         </div>
 
         {/* Hero Tile (Active Jobs List) - 3x2 on desktop */}
         <div 
-          className="glass-panel col-span-1 md:col-span-2 lg:col-span-3 row-span-2 rounded-3xl p-6 md:p-8 flex flex-col transition-transform hover:scale-[1.01] duration-300 relative overflow-hidden"
+          className="glass-panel col-span-1 md:col-span-3 lg:col-span-4 rounded-3xl p-6 md:p-8 flex flex-col transition-transform hover:scale-[1.01] duration-300 relative overflow-hidden h-fit"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand/10 rounded-full blur-3xl -mr-24 -mt-24"></div>
           
@@ -157,12 +168,9 @@ export default function Home() {
                 {filteredActiveJobs.length} FOUND
               </span>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black text-white/20 uppercase tracking-tighter hidden sm:block">Click any job to manage specs</span>
-            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 z-10 space-y-3">
+          <div className="flex-1 z-10">
             {filteredActiveJobs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredActiveJobs.map((job) => (
@@ -262,75 +270,26 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Quick Add - 1x1 */}
-        <div 
-          onClick={openNewJobModal}
-          className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.02] duration-300 cursor-pointer group hover:border-brand/50"
-        >
-          <div className="w-16 h-16 bg-brand/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-brand group-hover:shadow-lg group-hover:shadow-brand/20 transition-all duration-300 transform group-hover:-translate-y-1">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-brand group-hover:text-bg-base transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <h3 className="font-bold text-lg">New Job</h3>
-          <p className="text-text-muted text-sm mt-1">Record a paint spec</p>
-        </div>
 
-        {/* Stats Tile - 1x1 */}
-        <div className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300 relative overflow-hidden group">
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-brand/5 rounded-full blur-2xl group-hover:bg-brand/10 transition-colors"></div>
-          <div>
-            <p className="text-[10px] font-black text-brand uppercase tracking-widest mb-1">Total Jobs</p>
-            <h3 className="text-4xl font-black text-white">{allJobs.length}</h3>
-          </div>
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-text-muted uppercase">Completed</p>
-              <p className="text-sm font-bold text-white">{allJobs.filter(j => j.status === 'completed').length}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-bold text-text-muted uppercase">Active</p>
-              <p className="text-sm font-bold text-brand">{activeJobs.length}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Colours Tile - 1x1 */}
-        <div className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col justify-between transition-transform hover:scale-[1.02] duration-300 group">
-          <p className="text-[10px] font-black text-brand uppercase tracking-widest mb-2">Recent Colours</p>
-          <div className="flex flex-wrap gap-2">
-            {allJobs.flatMap(j => j.paintSpecs).slice(0, 8).map((spec, i) => (
-              <div 
-                key={i} 
-                className="w-8 h-8 rounded-lg border border-white/10 shadow-sm transition-transform hover:scale-110"
-                style={{ backgroundColor: spec.colourCode || '#333' }}
-                title={spec.colourName}
-              />
-            ))}
-            {allJobs.flatMap(j => j.paintSpecs).length === 0 && (
-              <p className="text-xs text-text-muted italic">No colours yet</p>
-            )}
-          </div>
-          <div className="mt-2">
-            <p className="text-[10px] font-bold text-text-muted uppercase">Unique Brands</p>
-            <p className="text-sm font-bold text-white">
-              {new Set(allJobs.flatMap(j => j.paintSpecs).map(s => s.manufacturer)).size}
-            </p>
-          </div>
-        </div>
-
-        {/* Reports Tile - 1x1 */}
+        {/* Advanced Tools Tile - Full Width */}
         <Link 
           href="/developer"
-          className="glass-panel col-span-1 row-span-1 rounded-3xl p-6 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.02] duration-300 cursor-pointer group hover:border-brand/50"
+          className="glass-panel col-span-1 md:col-span-3 lg:col-span-4 rounded-3xl p-6 flex flex-row items-center justify-between transition-transform hover:scale-[1.01] duration-300 cursor-pointer group hover:border-brand/50"
         >
-          <div className="w-12 h-12 bg-bg-panel-hover rounded-xl flex items-center justify-center mb-3 group-hover:text-brand transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-bg-panel-hover rounded-xl flex items-center justify-center group-hover:text-brand transition-colors border border-border-subtle">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-sm uppercase tracking-widest text-text-main">Advanced Tools</h3>
+              <p className="text-[10px] text-text-muted mt-1 uppercase">CSV Export & Import</p>
+            </div>
           </div>
-          <h3 className="font-bold text-sm uppercase tracking-widest">Advanced Tools</h3>
-          <p className="text-[10px] text-text-muted mt-1 uppercase">CSV Export & Import</p>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-text-muted group-hover:text-brand transition-all transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </Link>
 
         <JobModal 

@@ -13,24 +13,6 @@ export default function DeveloperPage() {
   const router = useRouter();
   const [importing, setImporting] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
-  const [stats, setStats] = useState({ totalJobs: 0, totalSpecs: 0, manufacturers: 0 });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const jobs = await getJobs();
-        const specs = jobs.flatMap(j => j.paintSpecs);
-        setStats({
-          totalJobs: jobs.length,
-          totalSpecs: specs.length,
-          manufacturers: new Set(specs.map(s => s.manufacturer)).size
-        });
-      } catch (error) {
-        console.error("Failed to fetch developer stats:", error);
-      }
-    };
-    if (user) fetchStats();
-  }, [user]);
 
   // Redirect if not logged in or not the developer
   useEffect(() => {
@@ -99,9 +81,9 @@ export default function DeveloperPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-text-main">
-            Developer Area
+            Advanced Tools
           </h1>
-          <p className="text-text-muted text-sm">Manage configuration and telemetry</p>
+          <p className="text-text-muted text-sm">Manage data portability</p>
         </div>
       </header>
 
@@ -116,42 +98,10 @@ export default function DeveloperPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold mb-2">Developer Dashboard</h2>
+          <h2 className="text-2xl font-bold mb-2">Advanced Data Tools</h2>
           <p className="text-text-muted max-w-md mx-auto mb-8">
-            This area is restricted to authorized developers. Use the tools below to manage and monitor the application.
+            Manage your job records using standard CSV templates. This allows for bulk updates and external record keeping.
           </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl text-left">
-            <div className="bg-bg-panel border border-border-subtle rounded-xl p-5 hover:border-brand/50 transition-colors group">
-              <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors mb-1">System Stats</h3>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                <div className="text-center">
-                  <p className="text-[10px] text-text-muted uppercase font-bold">Jobs</p>
-                  <p className="text-lg font-black text-brand">{stats.totalJobs}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[10px] text-text-muted uppercase font-bold">Specs</p>
-                  <p className="text-lg font-black text-white">{stats.totalSpecs}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[10px] text-text-muted uppercase font-bold">Brands</p>
-                  <p className="text-lg font-black text-white">{stats.manufacturers}</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-bg-panel border border-border-subtle rounded-xl p-5 hover:border-brand/50 transition-colors cursor-pointer group">
-              <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors mb-1">Feature Flags</h3>
-              <p className="text-sm text-text-muted">Toggle experimental features across the application.</p>
-            </div>
-            <div className="bg-bg-panel border border-border-subtle rounded-xl p-5 hover:border-brand/50 transition-colors cursor-pointer group">
-              <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors mb-1">User Management</h3>
-              <p className="text-sm text-text-muted">Review and manage authenticated users in the system.</p>
-            </div>
-            <div className="bg-bg-panel border border-border-subtle rounded-xl p-5 hover:border-brand/50 transition-colors cursor-pointer group">
-              <h3 className="font-semibold text-text-main group-hover:text-brand transition-colors mb-1">System Logs</h3>
-              <p className="text-sm text-text-muted">Monitor application health and error reports.</p>
-            </div>
-          </div>
 
           <div className="mt-12 w-full max-w-2xl text-left border-t border-border-subtle/30 pt-8">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
