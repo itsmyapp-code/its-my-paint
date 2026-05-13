@@ -44,6 +44,7 @@ function InventoryContent() {
   const printKey = searchParams.get("key");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [settings, setSettings] = useState<DecoratorSettings | null>(null);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [fetching, setFetching] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -100,6 +101,15 @@ function InventoryContent() {
       setJobs(allJobs);
       if (decoratorSettings) {
         setSettings(decoratorSettings);
+        if (decoratorSettings.logoUrl) {
+          try {
+            const response = await fetch(decoratorSettings.logoUrl);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            reader.onloadend = () => setLogoDataUrl(reader.result as string);
+            reader.readAsDataURL(blob);
+          } catch (e) { console.error("Logo fetch failed", e); }
+        }
       }
     } catch (error) {
       console.error("Error fetching jobs for inventory:", error);
@@ -112,30 +122,44 @@ function InventoryContent() {
     setIsGenerating(true);
     
     try {
+      // Small delay to let the UI update
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const html2pdfModule = await import('html2pdf.js');
       const html2pdf = html2pdfModule.default || html2pdfModule;
       const element = document.getElementById('inventory-report-render');
       
-      if (!element) {
-        console.error("Report element not found");
-        return;
-      }
+      if (!element) return;
 
-      const filename = filterKey 
-        ? `Paint_Spec_${filterKey.replace(/-/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`
-        : `Full_Paint_Inventory_${new Date().toISOString().split('T')[0]}.pdf`;
+      // Nuclear option: Scan all elements and replace oklab/oklch with RGB
+      // html2canvas fails on modern color functions
+      const elements = element.querySelectorAll('*');
+
+      elements.forEach((el: any) => {
+        const style = window.getComputedStyle(el);
+        ['color', 'backgroundColor', 'borderColor'].forEach(prop => {
+          const val = (style as any)[prop];
+          if (val && (val.includes('oklab') || val.includes('oklch'))) {
+            // Force a simple color based on common classes if possible, or fallback to black/white
+            if (el.classList.contains('text-brand')) el.style[prop] = '#F59E0B';
+            else if (el.classList.contains('bg-brand')) el.style[prop] = '#F59E0B';
+            else if (el.classList.contains('text-gray-900')) el.style[prop] = '#111827';
+            else if (el.classList.contains('text-gray-500')) el.style[prop] = '#6b7280';
+            else el.style[prop] = prop === 'backgroundColor' ? 'transparent' : '#111827';
+          }
+        });
+      });
 
       const opt = {
         margin: [10, 10, 10, 10] as [number, number, number, number],
-        filename: filename,
+        filename: `Inventory_Report_${new Date().toISOString().split('T')[0]}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { 
           scale: 2, 
           useCORS: true, 
-          logging: true,
+          logging: false,
           letterRendering: true,
-          windowWidth: 1200,
-          backgroundColor: '#ffffff'
+          allowTaint: true
         },
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
@@ -308,9 +332,13 @@ function InventoryContent() {
           <div id="inventory-report-render" className="shadow-2xl mb-20 bg-white">
             <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8 w-full">
               <div className="flex-1 pr-4">
-                {settings?.logoUrl && (
+                {(logoDataUrl || settings?.logoUrl) && (
                   <div className="relative w-32 h-32 mb-4">
-                    <Image src={settings.logoUrl} alt="Logo" fill className="object-contain object-left" />
+                    <img 
+                      src={logoDataUrl || settings?.logoUrl} 
+                      alt="Logo" 
+                      className="w-full h-full object-contain object-left" 
+                    />
                   </div>
                 )}
                 <h1 className="text-3xl font-black text-gray-900 mb-1 break-words">{settings?.businessName || "Paint Usage Inventory"}</h1>
