@@ -96,7 +96,7 @@ export default function HelpPage() {
           <h3 className="text-2xl font-black text-white uppercase">Still have questions?</h3>
           <p className="text-text-muted max-w-xl mx-auto">We are here to help you get the most out of your professional tools. Contact our support team for personal assistance.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="mailto:support@itsmypaint.com" className="bg-brand text-bg-base px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-brand/90 transition-all shadow-lg shadow-brand/20">
+            <a href="mailto:hello@itsmyapp.co.uk" className="bg-brand text-bg-base px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-brand/90 transition-all shadow-lg shadow-brand/20">
               Email Support
             </a>
             <Link href="/settings" className="bg-bg-panel-hover text-text-main border border-border-subtle px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:border-brand transition-all">
