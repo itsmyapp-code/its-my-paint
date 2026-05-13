@@ -118,6 +118,9 @@ export default function Home() {
               <Link href="/settings" className="block px-4 py-2 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
                 Settings
               </Link>
+              <Link href="/help" className="block px-4 py-2 mt-1 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
+                Help & Support
+              </Link>
               <Link href="/developer" className="block px-4 py-2 mt-1 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
                 Advanced Tools
               </Link>
@@ -223,11 +226,11 @@ export default function Home() {
                     <div className="flex-1">
                       <div className="flex justify-between items-start mb-4 pr-16">
                         <div className="min-w-0">
-                          <h3 className="text-xl font-black text-white truncate leading-tight group-hover:text-brand transition-colors uppercase tracking-tight">{job.name}</h3>
+                          <h3 className="text-xl font-black text-white leading-tight group-hover:text-brand transition-colors uppercase tracking-tight break-words">{job.name}</h3>
                           <p className="text-sm font-medium text-text-muted truncate mt-0.5">{job.clientName}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Due Date</p>
+                          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Date</p>
                           <p className="text-xs font-bold text-white">{new Date(job.dueDate || job.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                         </div>
                       </div>
@@ -263,6 +266,13 @@ export default function Home() {
                         </div>
                         {job.paintSpecs.length > 4 && (
                           <span className="text-[10px] text-text-muted font-bold">+{job.paintSpecs.length - 4}</span>
+                        )}
+                        {job.imageUrls && job.imageUrls.length > 0 && (
+                          <div className="ml-2 p-1.5 bg-brand/10 text-brand rounded-lg border border-brand/20" title="Images attached">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                            </svg>
+                          </div>
                         )}
                       </div>
                       <div className="flex items-center gap-2">

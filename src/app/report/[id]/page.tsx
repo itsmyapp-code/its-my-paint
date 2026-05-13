@@ -153,6 +153,22 @@ export default function ReportPage() {
           --tw-shadow: 0 0 #0000 !important;
           --tw-backdrop-blur: none !important;
         }
+
+        /* Prevent breaking inside elements in PDF */
+        .spec-row {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+        
+        .section-keep-together {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+
+        .page-break-before {
+          page-break-before: always !important;
+          break-before: page !important;
+        }
       `}</style>
 
       {/* Control Bar */}
@@ -222,7 +238,7 @@ export default function ReportPage() {
         </div>
 
         {/* Job Details Section */}
-        <div className="grid grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-2 gap-8 mb-12 section-keep-together">
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
             <h3 className="text-[10px] font-black text-brand uppercase tracking-widest mb-4">Project Information</h3>
             <div className="space-y-3">
@@ -276,7 +292,7 @@ export default function ReportPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {job.paintSpecs.map((spec, i) => (
-                  <tr key={i} className="hover:bg-gray-50 transition-colors">
+                  <tr key={i} className="hover:bg-gray-50 transition-colors spec-row">
                     <td className="px-6 py-6">
                       <p className="font-black text-gray-900 text-lg uppercase leading-tight">{spec.area}</p>
                       <p className="text-sm font-bold text-brand">{spec.what}</p>
@@ -312,7 +328,7 @@ export default function ReportPage() {
 
         {/* Photos Section */}
         {job.imageUrls && job.imageUrls.length > 0 && (
-          <div className="mb-12 break-inside-avoid">
+          <div className="mb-12 section-keep-together">
             <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
               <span className="w-1.5 h-6 bg-brand rounded-full"></span>
               Site Reference Photos
