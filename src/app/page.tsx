@@ -121,6 +121,9 @@ export default function Home() {
               <Link href="/help" className="block px-4 py-2 mt-1 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
                 Help & Support
               </Link>
+              <Link href="/inventory" className="block px-4 py-2 mt-1 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
+                Inventory Report
+              </Link>
               <Link href="/developer" className="block px-4 py-2 mt-1 rounded-xl text-sm font-medium text-text-main hover:bg-bg-panel-hover transition-colors">
                 Advanced Tools
               </Link>
@@ -184,6 +187,34 @@ export default function Home() {
             ARCHIVE
           </button>
         </div>
+
+        {view === 'reports' && (
+          <Link 
+            href="/inventory"
+            className="block w-full p-6 glass-panel rounded-3xl border border-brand/20 bg-brand/5 hover:bg-brand/10 transition-all group overflow-hidden relative"
+          >
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-brand/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-brand/20 rounded-2xl flex items-center justify-center text-brand border border-brand/30 shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white uppercase tracking-tight">Paint Usage Inventory</h3>
+                  <p className="text-sm font-bold text-brand uppercase tracking-tighter">View a summary of all paints used across all projects</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-brand">
+                <span className="text-xs font-black uppercase tracking-widest">Open Inventory</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transform group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+        )}
 
         {/* Jobs List */}
         <div 
