@@ -1,6 +1,17 @@
+import Link from "next/link";
+
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen p-8 md:p-16 max-w-4xl mx-auto text-text-main">
+    <div className="min-h-screen bg-bg-base p-4 md:p-8 max-w-4xl mx-auto text-text-main">
+      <header className="mb-12">
+        <Link href="/" className="flex items-center gap-2 text-text-muted hover:text-brand transition-colors font-bold uppercase tracking-widest text-xs">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </Link>
+      </header>
+
       <h1 className="text-4xl font-bold mb-4 text-brand">Terms of Service</h1>
       <p className="text-text-muted mb-8">Last Updated: May 10, 2026</p>
 
