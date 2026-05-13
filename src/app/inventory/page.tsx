@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useMemo, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getJobs, getDecoratorSettings } from "@/lib/firestore";
@@ -24,8 +24,24 @@ interface PaintUsage {
 }
 
 export default function InventoryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-bg-base">
+        <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <InventoryContent />
+    </Suspense>
+  );
+}
+
+function InventoryContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const isPrintMode = searchParams.get("print") === "true";
+  const printKey = searchParams.get("key");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [settings, setSettings] = useState<DecoratorSettings | null>(null);
   const [fetching, setFetching] = useState(true);
@@ -40,6 +56,16 @@ export default function InventoryPage() {
       fetchData();
     }
   }, [user, loading, router]);
+
+  // Handle auto-printing when in print mode
+  useEffect(() => {
+    if (isPrintMode && !fetching && paintUsageData.length > 0) {
+      const timer = setTimeout(() => {
+        handleDownloadPDF(printKey);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isPrintMode, fetching, paintUsageData, printKey]);
 
   const fetchData = async () => {
     try {
@@ -59,18 +85,17 @@ export default function InventoryPage() {
   };
 
   const handleDownloadPDF = async (filterKey: string | null = null) => {
-    setReportFilter(filterKey);
     setIsGenerating(true);
     
     try {
-      // Increase delay to ensure full React render and image loads
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       const html2pdfModule = await import('html2pdf.js');
       const html2pdf = html2pdfModule.default || html2pdfModule;
-      const element = document.getElementById('inventory-report');
+      const element = document.getElementById('inventory-report-render');
       
-      if (!element) return;
+      if (!element) {
+        console.error("Report element not found");
+        return;
+      }
 
       const filename = filterKey 
         ? `Paint_Spec_${filterKey.replace(/-/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`
@@ -83,9 +108,10 @@ export default function InventoryPage() {
         html2canvas: { 
           scale: 2, 
           useCORS: true, 
-          logging: false,
+          logging: true,
           letterRendering: true,
-          windowWidth: 800 // Force a specific width for capture
+          windowWidth: 1200,
+          backgroundColor: '#ffffff'
         },
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
@@ -95,8 +121,6 @@ export default function InventoryPage() {
       console.error("PDF generation failed:", error);
     } finally {
       setIsGenerating(false);
-      // Reset filter after generation
-      setTimeout(() => setReportFilter(null), 100);
     }
   };
 
@@ -153,31 +177,28 @@ export default function InventoryPage() {
   return (
     <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto flex flex-col">
       <style jsx global>{`
-        @media print {
-          @page { margin: 10mm; size: a4; }
-          body { background: white !important; }
-          .print-hidden { display: none !important; }
-        }
-        
-        #inventory-report {
+        #inventory-report-render {
           background-color: white !important;
           color: #111827 !important;
           font-family: sans-serif !important;
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
         }
 
-        #inventory-report * {
+        #inventory-report-render * {
           color-scheme: light !important;
           border-color: #e5e7eb !important;
         }
 
-        #inventory-report .text-brand { color: #F59E0B !important; }
-        #inventory-report .bg-brand { background-color: #F59E0B !important; }
-        #inventory-report .border-brand { border-color: #F59E0B !important; }
-        #inventory-report .bg-gray-50 { background-color: #f9fafb !important; }
-        #inventory-report .text-gray-900 { color: #111827 !important; }
-        #inventory-report .text-gray-600 { color: #4b5563 !important; }
-        #inventory-report .text-gray-500 { color: #6b7280 !important; }
-        #inventory-report .text-gray-400 { color: #9ca3af !important; }
+        #inventory-report-render .text-brand { color: #F59E0B !important; }
+        #inventory-report-render .bg-brand { background-color: #F59E0B !important; }
+        #inventory-report-render .border-brand { border-color: #F59E0B !important; }
+        #inventory-report-render .bg-gray-50 { background-color: #f9fafb !important; }
+        #inventory-report-render .text-gray-900 { color: #111827 !important; }
+        #inventory-report-render .text-gray-600 { color: #4b5563 !important; }
+        #inventory-report-render .text-gray-500 { color: #6b7280 !important; }
+        #inventory-report-render .text-gray-400 { color: #9ca3af !important; }
 
         .inventory-item {
           page-break-inside: avoid !important;
@@ -226,7 +247,7 @@ export default function InventoryPage() {
             </svg>
           </div>
           <button 
-            onClick={() => handleDownloadPDF(null)}
+            onClick={() => router.push("/inventory?print=true")}
             disabled={isGenerating}
             className="bg-brand hover:bg-brand/90 text-bg-base font-bold py-2 px-6 rounded-xl transition-all shadow-lg shadow-brand/20 flex items-center gap-2"
           >
@@ -237,6 +258,113 @@ export default function InventoryPage() {
           </button>
         </div>
       </header>
+
+      {/* Conditionally Render Dashboard or Report */}
+      {isPrintMode ? (
+        <div className="bg-white min-h-screen">
+          <div className="max-w-[210mm] mx-auto p-4 flex justify-between items-center print-hidden mb-4 sticky top-0 bg-gray-100/80 backdrop-blur z-50 rounded-xl">
+            <button 
+              onClick={() => router.push("/inventory")}
+              className="text-gray-600 font-bold flex items-center gap-2 hover:text-gray-900 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              CLOSE PREVIEW
+            </button>
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                {isGenerating ? "GENERATING PDF..." : "REPORT PREVIEW"}
+              </span>
+              <button 
+                onClick={() => handleDownloadPDF(printKey)}
+                disabled={isGenerating}
+                className="bg-brand text-bg-base font-bold py-2 px-4 rounded-lg text-sm"
+              >
+                DOWNLOAD AGAIN
+              </button>
+            </div>
+          </div>
+
+          <div id="inventory-report-render" className="p-10 shadow-2xl mb-20 bg-white">
+            <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8">
+              <div>
+                {settings?.logoUrl && (
+                  <div className="relative w-32 h-32 mb-4">
+                    <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-contain object-left" />
+                  </div>
+                )}
+                <h1 className="text-3xl font-black text-gray-900 mb-1">{settings?.businessName || "Paint Usage Inventory"}</h1>
+                <p className="text-gray-500 font-medium">Specification Inventory Report</p>
+              </div>
+              <div className="text-right text-sm">
+                <h2 className="text-brand font-black text-xl mb-4 uppercase">Product Inventory</h2>
+                <div className="space-y-1 text-gray-600">
+                  <p>Generated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  {settings?.email && <p>{settings.email}</p>}
+                  {settings?.website && <p>{settings.website}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              {paintUsageData
+                .filter(usage => !printKey || usage.key === printKey)
+                .map((usage) => (
+                <div key={usage.key} className="inventory-item border border-gray-200 rounded-2xl p-6 bg-white">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div 
+                        className="w-16 h-16 rounded-xl border border-gray-200 shadow-sm"
+                        style={{ backgroundColor: usage.colourCode || '#f3f4f6' }}
+                      />
+                      <div>
+                        <h3 className="text-xl font-black text-gray-900 uppercase leading-tight">{usage.colourName}</h3>
+                        <p className="text-sm font-bold text-brand uppercase tracking-tighter">{usage.manufacturer}</p>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 border border-gray-100 px-4 py-1.5 rounded-full">
+                      <p className="text-[10px] font-black text-gray-900 uppercase">{usage.jobs.length} Project Applications</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Product Details</p>
+                      <p className="text-xs text-gray-700">Range: <span className="font-bold text-gray-900">{usage.range || 'N/A'}</span></p>
+                      <p className="text-xs text-gray-700">Finish: <span className="font-bold text-gray-900">{usage.finish}</span></p>
+                    </div>
+                    <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Colour Specs</p>
+                      <p className="text-xs text-gray-700">Ref: <span className="font-mono text-gray-900">{usage.colourCode || 'N/A'}</span></p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Usage History</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {usage.jobs.map((j, idx) => (
+                        <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                          <p className="text-xs font-bold text-gray-900 uppercase">{j.jobName}</p>
+                          <p className="text-[10px] text-gray-500 uppercase">{j.area} • {j.what}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-end">
+              <div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Report Platform</p>
+                <p className="text-sm font-bold text-gray-900 uppercase">itsmypaint Professional</p>
+              </div>
+              <p className="text-[10px] text-gray-400 uppercase font-medium">Page Specification Analysis</p>
+            </div>
+          </div>
+        </div>
+      ) : (
 
       <main className="flex-1 print-hidden">
         {/* Search for mobile */}
@@ -269,7 +397,7 @@ export default function InventoryPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => handleDownloadPDF(usage.key)}
+                      onClick={() => router.push(`/inventory?print=true&key=${usage.key}`)}
                       className="p-2 bg-brand/10 text-brand rounded-xl border border-brand/20 hover:bg-brand hover:text-bg-base transition-all"
                       title="Download PDF for this colour"
                     >
@@ -332,89 +460,7 @@ export default function InventoryPage() {
         </p>
       </footer>
 
-      {/* Printable Report Container (Hidden from view but visible to html2canvas) */}
-      <div 
-        id="inventory-report" 
-        className="fixed top-0 left-0 w-[210mm] bg-white p-10 opacity-0 pointer-events-none"
-        style={{ zIndex: -100 }}
-      >
-        <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8">
-          <div>
-            {settings?.logoUrl && (
-              <div className="relative w-32 h-32 mb-4">
-                {/* Use standard img for PDF compatibility */}
-                <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-contain object-left" />
-              </div>
-            )}
-            <h1 className="text-3xl font-black text-gray-900 mb-1">{settings?.businessName || "Paint Usage Inventory"}</h1>
-            <p className="text-gray-500 font-medium">Specification Inventory Report</p>
-          </div>
-          <div className="text-right text-sm">
-            <h2 className="text-brand font-black text-xl mb-4 uppercase">Product Inventory</h2>
-            <div className="space-y-1 text-gray-600">
-              <p>Generated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-              {settings?.email && <p>{settings.email}</p>}
-              {settings?.website && <p>{settings.website}</p>}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-8">
-          {paintUsageData
-            .filter(usage => !reportFilter || usage.key === reportFilter)
-            .map((usage) => (
-            <div key={usage.key} className="inventory-item border border-gray-200 rounded-2xl p-6 bg-white">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div 
-                    className="w-16 h-16 rounded-xl border border-gray-200 shadow-sm"
-                    style={{ backgroundColor: usage.colourCode || '#f3f4f6' }}
-                  />
-                  <div>
-                    <h3 className="text-xl font-black text-gray-900 uppercase leading-tight">{usage.colourName}</h3>
-                    <p className="text-sm font-bold text-brand uppercase tracking-tighter">{usage.manufacturer}</p>
-                  </div>
-                </div>
-                <div className="bg-gray-50 border border-gray-100 px-4 py-1.5 rounded-full">
-                  <p className="text-[10px] font-black text-gray-900 uppercase">{usage.jobs.length} Project Applications</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Product Details</p>
-                  <p className="text-xs text-gray-700">Range: <span className="font-bold text-gray-900">{usage.range || 'N/A'}</span></p>
-                  <p className="text-xs text-gray-700">Finish: <span className="font-bold text-gray-900">{usage.finish}</span></p>
-                </div>
-                <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Colour Specs</p>
-                  <p className="text-xs text-gray-700">Ref: <span className="font-mono text-gray-900">{usage.colourCode || 'N/A'}</span></p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Usage History</p>
-                <div className="grid grid-cols-1 gap-2">
-                  {usage.jobs.map((j, idx) => (
-                    <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                      <p className="text-xs font-bold text-gray-900 uppercase">{j.jobName}</p>
-                      <p className="text-[10px] text-gray-500 uppercase">{j.area} • {j.what}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-end">
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Report Platform</p>
-            <p className="text-sm font-bold text-gray-900 uppercase">itsmypaint Professional</p>
-          </div>
-          <p className="text-[10px] text-gray-400 uppercase font-medium">Page Specification Analysis</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
