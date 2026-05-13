@@ -63,8 +63,8 @@ export default function InventoryPage() {
     setIsGenerating(true);
     
     try {
-      // Wait for React to update the report-content element with the filter
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Increase delay to ensure full React render and image loads
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       const html2pdfModule = await import('html2pdf.js');
       const html2pdf = html2pdfModule.default || html2pdfModule;
@@ -85,8 +85,7 @@ export default function InventoryPage() {
           useCORS: true, 
           logging: false,
           letterRendering: true,
-          scrollY: 0,
-          scrollX: 0
+          windowWidth: 800 // Force a specific width for capture
         },
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
@@ -160,23 +159,32 @@ export default function InventoryPage() {
           .print-hidden { display: none !important; }
         }
         
-        #inventory-report, #inventory-report * {
-          color-scheme: light !important;
-          --color-brand: #F59E0B !important;
-          color: inherit;
-          background-color: transparent;
+        #inventory-report {
+          background-color: white !important;
+          color: #111827 !important;
+          font-family: sans-serif !important;
         }
 
-        #inventory-report .bg-brand { background-color: #F59E0B !important; }
+        #inventory-report * {
+          color-scheme: light !important;
+          border-color: #e5e7eb !important;
+        }
+
         #inventory-report .text-brand { color: #F59E0B !important; }
+        #inventory-report .bg-brand { background-color: #F59E0B !important; }
         #inventory-report .border-brand { border-color: #F59E0B !important; }
         #inventory-report .bg-gray-50 { background-color: #f9fafb !important; }
         #inventory-report .text-gray-900 { color: #111827 !important; }
         #inventory-report .text-gray-600 { color: #4b5563 !important; }
+        #inventory-report .text-gray-500 { color: #6b7280 !important; }
+        #inventory-report .text-gray-400 { color: #9ca3af !important; }
 
         .inventory-item {
           page-break-inside: avoid !important;
           break-inside: avoid !important;
+          border: 1px solid #e5e7eb !important;
+          margin-bottom: 20px !important;
+          background-color: white !important;
         }
       `}</style>
 
@@ -324,17 +332,18 @@ export default function InventoryPage() {
         </p>
       </footer>
 
-      {/* Printable Report Container (Off-screen for html2canvas) */}
+      {/* Printable Report Container (Hidden from view but visible to html2canvas) */}
       <div 
         id="inventory-report" 
-        className="fixed top-0 left-[-9999px] w-[210mm] bg-white p-10 min-h-screen"
-        style={{ zIndex: -1 }}
+        className="fixed top-0 left-0 w-[210mm] bg-white p-10 opacity-0 pointer-events-none"
+        style={{ zIndex: -100 }}
       >
         <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8">
           <div>
             {settings?.logoUrl && (
               <div className="relative w-32 h-32 mb-4">
-                <Image src={settings.logoUrl} alt="Logo" fill className="object-contain object-left" />
+                {/* Use standard img for PDF compatibility */}
+                <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-contain object-left" />
               </div>
             )}
             <h1 className="text-3xl font-black text-gray-900 mb-1">{settings?.businessName || "Paint Usage Inventory"}</h1>
