@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { createJob, updateJob, deleteJob } from "@/lib/firestore";
 import { Job, PaintSpec } from "@/lib/models";
 import { uploadJobImage } from "@/lib/storage";
@@ -16,6 +17,7 @@ interface JobModalProps {
 }
 
 export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: JobModalProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -110,8 +112,8 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, skipClose: boolean = false) => {
+    if (e) e.preventDefault();
     setLoading(true);
     console.log("Starting job save process...");
     try {
@@ -124,7 +126,6 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
         const uploadedUrls = await Promise.all(
           newImages.map(file => uploadJobImage(initialJob.id!, file))
         );
-        console.log("Images uploaded:", uploadedUrls);
         
         await updateJob(initialJob.id, {
           ...formData,
@@ -132,33 +133,36 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
           imageUrls: [...existingImages, ...uploadedUrls],
         });
       } else {
-        console.log("Creating new job in Firestore...");
         const result = await createJob({
           ...formData,
           startDate: new Date().toISOString(),
           paintSpecs: filteredSpecs,
-          imageUrls: [], // Images uploaded after creation if needed, but for simplicity we'll just create then upload
+          imageUrls: [],
         });
         jobId = result.id;
-        console.log("Job created with ID:", jobId);
         
-        // Now upload images if any
         if (newImages.length > 0) {
-          console.log(`Uploading ${newImages.length} images for new job...`);
           const uploadedUrls = await Promise.all(
             newImages.map(file => uploadJobImage(jobId!, file))
           );
-          console.log("Images uploaded:", uploadedUrls);
           await updateJob(jobId!, { imageUrls: uploadedUrls });
         }
       }
-      console.log("Save process complete!");
       onSuccess();
-      onClose();
+      if (!skipClose) onClose();
+      return jobId;
     } catch (error) {
       console.error("Error saving job:", error);
+      return null;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveAndDownload = async () => {
+    const jobId = await handleSubmit(undefined, true);
+    if (jobId) {
+      router.push(`/report/${jobId}?download=true`);
     }
   };
 
@@ -469,15 +473,21 @@ export default function JobModal({ isOpen, onClose, onSuccess, initialJob }: Job
         <div className="p-6 border-t border-white/10 flex flex-col sm:flex-row gap-3 bg-white/5">
           {initialJob && (
             <div className="flex gap-3 w-full sm:w-auto">
-              <Link 
-                href={`/report/${initialJob.id}?download=true`}
-                className="w-full sm:w-12 h-12 flex items-center justify-center border border-brand/30 text-brand rounded-xl hover:bg-brand hover:text-bg-base transition-all"
-                title="Download PDF Report"
+              <button 
+                type="button"
+                onClick={handleSaveAndDownload}
+                disabled={loading}
+                className="w-full sm:w-12 h-12 flex items-center justify-center border border-brand/30 text-brand rounded-xl hover:bg-brand hover:text-bg-base transition-all disabled:opacity-50"
+                title="Save & Download PDF Report"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </Link>
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
               {deleteConfirm ? (
                 <div className="flex gap-2 w-full">
                   <button 

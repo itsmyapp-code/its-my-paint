@@ -141,12 +141,20 @@ export default function ReportPage() {
         #report-content .text-gray-500 { color: #6b7280 !important; }
         #report-content .text-gray-400 { color: #9ca3af !important; }
         #report-content .text-brand { color: #F59E0B !important; }
+        #report-content .text-green-700 { color: #15803d !important; }
+        #report-content .text-yellow-700 { color: #a16207 !important; }
+        
         #report-content .bg-gray-50 { background-color: #f9fafb !important; }
         #report-content .bg-gray-900 { background-color: #111827 !important; }
         #report-content .bg-brand { background-color: #F59E0B !important; }
+        #report-content .bg-green-100 { background-color: #dcfce7 !important; }
+        #report-content .bg-yellow-50 { background-color: #fefce8 !important; }
+        #report-content .bg-brand\/10 { background-color: #fef3c7 !important; } /* Fallback to light amber */
+        
         #report-content .border-gray-100 { border-color: #f3f4f6 !important; }
         #report-content .border-gray-200 { border-color: #e5e7eb !important; }
         #report-content .border-brand { border-color: #F59E0B !important; }
+        #report-content .border-yellow-400 { border-color: #facc15 !important; }
 
         #report-content * {
           --tw-ring-color: rgba(0,0,0,0) !important;
