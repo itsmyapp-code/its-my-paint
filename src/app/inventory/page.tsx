@@ -184,14 +184,16 @@ function InventoryContent() {
           width: 210mm;
           min-height: 297mm;
           margin: 0 auto;
+          box-sizing: border-box !important;
+          position: relative;
         }
 
         #inventory-report-render * {
           color-scheme: light !important;
           border-color: #e5e7eb !important;
-          /* Force standard color space for html2canvas compatibility */
+          box-sizing: border-box !important;
+          /* Force standard color space */
           color: inherit !important;
-          background-color: transparent;
         }
 
         #inventory-report-render h1, 
@@ -217,6 +219,7 @@ function InventoryContent() {
           border: 1px solid #e5e7eb !important;
           margin-bottom: 20px !important;
           background-color: white !important;
+          width: 100% !important;
         }
       `}</style>
 
@@ -298,22 +301,21 @@ function InventoryContent() {
           </div>
 
           <div id="inventory-report-render" className="p-10 shadow-2xl mb-20 bg-white">
-            <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8">
-              <div>
+            <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8 w-full">
+              <div className="flex-1 pr-4">
                 {settings?.logoUrl && (
                   <div className="relative w-32 h-32 mb-4">
                     <img 
                       src={settings.logoUrl} 
                       alt="Logo" 
                       className="w-full h-full object-contain object-left"
-                      crossOrigin="anonymous"
                     />
                   </div>
                 )}
-                <h1 className="text-3xl font-black text-gray-900 mb-1">{settings?.businessName || "Paint Usage Inventory"}</h1>
+                <h1 className="text-3xl font-black text-gray-900 mb-1 break-words">{settings?.businessName || "Paint Usage Inventory"}</h1>
                 <p className="text-gray-500 font-medium">Specification Inventory Report</p>
               </div>
-              <div className="text-right text-sm">
+              <div className="text-right text-sm shrink-0">
                 <h2 className="text-brand font-black text-xl mb-4 uppercase">Product Inventory</h2>
                 <div className="space-y-1 text-gray-600">
                   <p>Generated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
@@ -358,11 +360,13 @@ function InventoryContent() {
 
                   <div>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Usage History</p>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="space-y-2">
                       {usage.jobs.map((j, idx) => (
-                        <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                          <p className="text-xs font-bold text-gray-900 uppercase">{j.jobName}</p>
-                          <p className="text-[10px] text-gray-500 uppercase">{j.area} • {j.what}</p>
+                        <div key={idx} className="flex justify-between items-baseline py-2 border-b border-gray-50 last:border-0 gap-4">
+                          <p className="text-xs font-bold text-gray-900 uppercase shrink-0">{j.jobName}</p>
+                          <p className="text-[10px] text-gray-500 uppercase text-right leading-tight">
+                            {j.area} <span className="mx-1 text-gray-300">•</span> {j.what}
+                          </p>
                         </div>
                       ))}
                     </div>
