@@ -189,6 +189,17 @@ function InventoryContent() {
         #inventory-report-render * {
           color-scheme: light !important;
           border-color: #e5e7eb !important;
+          /* Force standard color space for html2canvas compatibility */
+          color: inherit !important;
+          background-color: transparent;
+        }
+
+        #inventory-report-render h1, 
+        #inventory-report-render h2, 
+        #inventory-report-render h3, 
+        #inventory-report-render p, 
+        #inventory-report-render span {
+          color: #111827 !important;
         }
 
         #inventory-report-render .text-brand { color: #F59E0B !important; }
@@ -263,15 +274,15 @@ function InventoryContent() {
       {isPrintMode ? (
         <div className="bg-white min-h-screen">
           <div className="max-w-[210mm] mx-auto p-4 flex justify-between items-center print-hidden mb-4 sticky top-0 bg-gray-100/80 backdrop-blur z-50 rounded-xl">
-            <button 
-              onClick={() => router.push("/inventory")}
+            <Link 
+              href="/inventory"
               className="text-gray-600 font-bold flex items-center gap-2 hover:text-gray-900 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
               CLOSE PREVIEW
-            </button>
+            </Link>
             <div className="flex items-center gap-4">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                 {isGenerating ? "GENERATING PDF..." : "REPORT PREVIEW"}
@@ -291,7 +302,12 @@ function InventoryContent() {
               <div>
                 {settings?.logoUrl && (
                   <div className="relative w-32 h-32 mb-4">
-                    <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-contain object-left" />
+                    <img 
+                      src={settings.logoUrl} 
+                      alt="Logo" 
+                      className="w-full h-full object-contain object-left"
+                      crossOrigin="anonymous"
+                    />
                   </div>
                 )}
                 <h1 className="text-3xl font-black text-gray-900 mb-1">{settings?.businessName || "Paint Usage Inventory"}</h1>
