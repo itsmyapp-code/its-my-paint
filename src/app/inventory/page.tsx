@@ -177,6 +177,25 @@ function InventoryContent() {
   return (
     <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto flex flex-col">
       <style jsx global>{`
+        #inventory-report-render, #inventory-report-render * {
+          color-scheme: light !important;
+          /* Strip all modern color spaces which break html2canvas */
+          --color-brand: #F59E0B !important;
+          --color-gray-50: #f9fafb !important;
+          --color-gray-100: #f3f4f6 !important;
+          --color-gray-200: #e5e7eb !important;
+          --color-gray-300: #d1d5db !important;
+          --color-gray-400: #9ca3af !important;
+          --color-gray-500: #6b7280 !important;
+          --color-gray-600: #4b5563 !important;
+          --color-gray-700: #374151 !important;
+          --color-gray-800: #1f2937 !important;
+          --color-gray-900: #111827 !important;
+          
+          color: inherit;
+          background-color: transparent;
+        }
+
         #inventory-report-render {
           background-color: white !important;
           color: #111827 !important;
@@ -184,34 +203,20 @@ function InventoryContent() {
           width: 210mm;
           min-height: 297mm;
           margin: 0 auto;
+          padding: 20mm !important;
           box-sizing: border-box !important;
-          position: relative;
         }
 
-        #inventory-report-render * {
-          color-scheme: light !important;
-          border-color: #e5e7eb !important;
-          box-sizing: border-box !important;
-          /* Force standard color space */
-          color: inherit !important;
-        }
-
-        #inventory-report-render h1, 
-        #inventory-report-render h2, 
-        #inventory-report-render h3, 
-        #inventory-report-render p, 
-        #inventory-report-render span {
-          color: #111827 !important;
-        }
-
-        #inventory-report-render .text-brand { color: #F59E0B !important; }
-        #inventory-report-render .bg-brand { background-color: #F59E0B !important; }
-        #inventory-report-render .border-brand { border-color: #F59E0B !important; }
-        #inventory-report-render .bg-gray-50 { background-color: #f9fafb !important; }
         #inventory-report-render .text-gray-900 { color: #111827 !important; }
         #inventory-report-render .text-gray-600 { color: #4b5563 !important; }
         #inventory-report-render .text-gray-500 { color: #6b7280 !important; }
         #inventory-report-render .text-gray-400 { color: #9ca3af !important; }
+        #inventory-report-render .text-brand { color: #F59E0B !important; }
+        
+        #inventory-report-render .bg-gray-50 { background-color: #f9fafb !important; }
+        #inventory-report-render .bg-brand { background-color: #F59E0B !important; }
+        #inventory-report-render .border-brand { border-color: #F59E0B !important; }
+        #inventory-report-render .border-gray-100 { border-color: #f3f4f6 !important; }
 
         .inventory-item {
           page-break-inside: avoid !important;
@@ -300,24 +305,20 @@ function InventoryContent() {
             </div>
           </div>
 
-          <div id="inventory-report-render" className="p-10 shadow-2xl mb-20 bg-white">
+          <div id="inventory-report-render" className="shadow-2xl mb-20 bg-white">
             <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8 w-full">
               <div className="flex-1 pr-4">
                 {settings?.logoUrl && (
                   <div className="relative w-32 h-32 mb-4">
-                    <img 
-                      src={settings.logoUrl} 
-                      alt="Logo" 
-                      className="w-full h-full object-contain object-left"
-                    />
+                    <Image src={settings.logoUrl} alt="Logo" fill className="object-contain object-left" />
                   </div>
                 )}
                 <h1 className="text-3xl font-black text-gray-900 mb-1 break-words">{settings?.businessName || "Paint Usage Inventory"}</h1>
                 <p className="text-gray-500 font-medium">Specification Inventory Report</p>
               </div>
               <div className="text-right text-sm shrink-0">
-                <h2 className="text-brand font-black text-xl mb-4 uppercase">Product Inventory</h2>
-                <div className="space-y-1 text-gray-600">
+                <h2 className="text-brand font-black text-xl mb-4 uppercase tracking-tight">Product Inventory</h2>
+                <div className="space-y-1 text-gray-600 font-medium">
                   <p>Generated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                   {settings?.email && <p>{settings.email}</p>}
                   {settings?.website && <p>{settings.website}</p>}
