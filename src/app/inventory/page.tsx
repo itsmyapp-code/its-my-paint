@@ -31,6 +31,7 @@ export default function InventoryPage() {
   const [fetching, setFetching] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [reportFilter, setReportFilter] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -57,20 +58,36 @@ export default function InventoryPage() {
     }
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = async (filterKey: string | null = null) => {
+    setReportFilter(filterKey);
     setIsGenerating(true);
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for React to update the report-content element with the filter
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       const html2pdfModule = await import('html2pdf.js');
       const html2pdf = html2pdfModule.default || html2pdfModule;
       const element = document.getElementById('inventory-report');
+      
       if (!element) return;
+
+      const filename = filterKey 
+        ? `Paint_Spec_${filterKey.replace(/-/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`
+        : `Full_Paint_Inventory_${new Date().toISOString().split('T')[0]}.pdf`;
 
       const opt = {
         margin: [10, 10, 10, 10] as [number, number, number, number],
-        filename: `Paint_Inventory_${new Date().toISOString().split('T')[0]}.pdf`,
+        filename: filename,
         image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          logging: false,
+          letterRendering: true,
+          scrollY: 0,
+          scrollX: 0
+        },
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
 
@@ -79,6 +96,8 @@ export default function InventoryPage() {
       console.error("PDF generation failed:", error);
     } finally {
       setIsGenerating(false);
+      // Reset filter after generation
+      setTimeout(() => setReportFilter(null), 100);
     }
   };
 
@@ -199,14 +218,14 @@ export default function InventoryPage() {
             </svg>
           </div>
           <button 
-            onClick={handleDownloadPDF}
+            onClick={() => handleDownloadPDF(null)}
             disabled={isGenerating}
             className="bg-brand hover:bg-brand/90 text-bg-base font-bold py-2 px-6 rounded-xl transition-all shadow-lg shadow-brand/20 flex items-center gap-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
-            PRINT REPORT
+            PRINT ALL
           </button>
         </div>
       </header>
@@ -240,8 +259,19 @@ export default function InventoryPage() {
                       <p className="text-sm font-bold text-brand uppercase tracking-tighter">{usage.manufacturer}</p>
                     </div>
                   </div>
-                  <div className="bg-bg-panel px-3 py-1 rounded-full border border-border-subtle shadow-sm shrink-0">
-                    <span className="text-xs font-black text-white">{usage.jobs.length} USES</span>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => handleDownloadPDF(usage.key)}
+                      className="p-2 bg-brand/10 text-brand rounded-xl border border-brand/20 hover:bg-brand hover:text-bg-base transition-all"
+                      title="Download PDF for this colour"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <div className="bg-bg-panel px-3 py-1 rounded-full border border-border-subtle shadow-sm shrink-0">
+                      <span className="text-xs font-black text-white">{usage.jobs.length} USES</span>
+                    </div>
                   </div>
                 </div>
 
@@ -294,8 +324,12 @@ export default function InventoryPage() {
         </p>
       </footer>
 
-      {/* Printable Report (Hidden by default) */}
-      <div id="inventory-report" className="hidden print:block fixed top-0 left-0 w-full bg-white p-10 min-h-screen">
+      {/* Printable Report Container (Off-screen for html2canvas) */}
+      <div 
+        id="inventory-report" 
+        className="fixed top-0 left-[-9999px] w-[210mm] bg-white p-10 min-h-screen"
+        style={{ zIndex: -1 }}
+      >
         <div className="flex justify-between items-start border-b-2 border-brand pb-8 mb-8">
           <div>
             {settings?.logoUrl && (
@@ -317,7 +351,9 @@ export default function InventoryPage() {
         </div>
 
         <div className="space-y-8">
-          {paintUsageData.map((usage) => (
+          {paintUsageData
+            .filter(usage => !reportFilter || usage.key === reportFilter)
+            .map((usage) => (
             <div key={usage.key} className="inventory-item border border-gray-200 rounded-2xl p-6 bg-white">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
